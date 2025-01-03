@@ -1,1 +1,80 @@
 # straceprof
+
+`straceprof` is a profiler designed for multi-process programs. `straceprof`
+can take profile of any process when you can run it under `strace`. It is
+particularly well-suited for profiling build processes such as those initiated
+by `make`, `cmake`, shell scripts, or `docker build`.
+
+## Quick start
+
+Run the following commands.
+```bash
+$ sudo apt install strace
+$ pipx install straceprof
+$ strace \
+    --output=straceprof.log \
+    --trace=execve,execveat,exit,exit_group \
+    --follow-forks \
+    --string-limit=1000 \
+    --absolute-timestamps=format:unix,precision:us \
+    <command to profile>
+$ straceprof \
+    --log=straceprof.log \
+    --output_image=straceprof.png
+```
+
+You will get a nice image!
+TODO: image here
+
+## Motivation
+
+Software compilation often involves numerous processes, including compilers,
+assemblers, linkers, and file copying operations. These processes are typically
+coordinated using tools like `make`.
+
+A common challenge in software development is the significant amount of time
+required to build software. For instance, building a programming language
+processor might take as long as 20 minutes. To expedite this process, it is
+essential to profile the build to pinpoint performance bottlenecks.
+
+However, profiling build processes can be complex due to the wide range of
+build systems available. While some build systems incorporate built-in
+profiling capabilities, others do not. Furthermore, developers frequently
+combine multiple build systems using shell scripts or Dockerfile to construct a
+single software product.
+
+To address these challenges, an effective profiler should be versatile and
+user-friendly. It must be capable of analyzing entire build processes,
+regardless of the underlying build system. Additionally, it should be suitable
+for various environments, including CI systems like GitHub Actions and
+containerized environments, where running privileged profilers such as `perf`
+may be restricted.
+
+In conclusion, we require a profiler that can be seamlessly integrated into
+diverse build processes without demanding elevated privileges.
+
+## Installation
+
+### On the computer you run the build process
+For Ubuntu,
+```
+$ sudo apt-get install strace
+```
+
+I'm sure you can install `strace` on any other distributions easily.
+
+### On the computer you want to generate the profile image
+
+```bash
+$ pipx install straceprof
+```
+
+or
+
+```
+$ pip3 install straceprof
+```
+
+## Usage
+
+TODO
