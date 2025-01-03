@@ -25,7 +25,7 @@ $ straceprof \
 
 You will get a nice image!
 
-![Example of straceprof output](./profile_example.png "Example of straceprof output")
+![Example of straceprof output](https://github.com/akawashiro/straceprof/blob/main/profile_example.png?raw=true "Example of straceprof output")
 
 ## Motivation
 
@@ -75,11 +75,6 @@ $ pipx install git+https://github.com/akawashiro/straceprof
 First, you need to generate a strace log file. You can generate a strace log
 file using the following command:
 
-> [!IMPORTANT]
-> Do not change the options for `strace` command other than `--output` and
-> `<command to profile>`. `straceprof` assumes you run `strace` with these
-> options.
-
 ```
 strace \
     --trace=execve,execveat,exit,exit_group \
@@ -89,6 +84,11 @@ strace \
     --output=<path to strace log file> \
     <command to profile>
 ```
+
+### Note
+Do not change the options for `strace` command other than `--output` and
+`<command to profile>`. `straceprof` assumes you run `strace` with these
+options.
 
 Then, you can generate a profile graph using the following command:
 
