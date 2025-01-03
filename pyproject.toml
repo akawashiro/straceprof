@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "straceprof"
-version = "0.0.2"
+version = "0.0.3"
 dependencies = ["matplotlib"]
 requires-python = ">=3.10"
 readme = "README.md"
