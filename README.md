@@ -1,7 +1,7 @@
 # straceprof
 
 `straceprof` is a profiler designed for multi-process programs. `straceprof`
-can take profile of any process when you can run it under `strace`. It is
+can take profile of any process when you can run it under [strace](https://strace.io/). It is
 particularly well-suited for profiling build processes such as those initiated
 by `make`, `cmake`, shell scripts, or `docker build`.
 
