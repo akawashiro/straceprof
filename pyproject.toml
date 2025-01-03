@@ -4,12 +4,12 @@ build-backend = "hatchling.build"
 
 [project]
 name = "straceprof"
-version = "0.0.0"
+version = "0.0.2"
 dependencies = ["matplotlib"]
 requires-python = ">=3.10"
 readme = "README.md"
 description = "Generate a profile graph from strace log"
-license = {file = "LICENSE"}
+license = {text = "MIT License"}
 authors = [
   {name = "Akira Kawata"},
 ]
