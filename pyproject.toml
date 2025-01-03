@@ -1,0 +1,6 @@
+[project]
+name = "straceprof"
+version = "0.0.0"
+dependencies = ["matplotlib"]
+[project.scripts]
+greet = "straceprof.cli:main"
