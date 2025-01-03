@@ -2,5 +2,21 @@
 name = "straceprof"
 version = "0.0.0"
 dependencies = ["matplotlib"]
+readme = "README.md"
+description = "Generate a profile graph from strace log"
+license = {file = "LICENSE"}
+authors = [
+  {name = "Akira Kawata"},
+]
+maintainers = [
+  {name = "Akira Kawata"}
+]
+keywords = ["strace", "profiling"]
+[project.urls]
+Repository = "https://github.com/akawashiro/straceprof"
+Issues = "https://github.com/akawashiro/straceprof/issues"
 [project.scripts]
-greet = "straceprof.cli:main"
+straceprof = "straceprof.cli:main"
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
