@@ -90,8 +90,8 @@ def plot_processes(
     )
     processes.sort(key=lambda p: p.start_time)
 
-    offset_time = 1 << 32
-    max_time = 0
+    offset_time = float(1 << 32)
+    max_time = 0.0
     for p in processes:
         s = p.start_time
         e = p.end_time
