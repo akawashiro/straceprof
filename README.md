@@ -24,7 +24,8 @@ $ straceprof \
 ```
 
 You will get a nice image!
-TODO: image here
+
+![Example of straceprof output](./profile_example.png "Example of straceprof output")
 
 ## Motivation
 
