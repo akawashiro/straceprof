@@ -66,6 +66,8 @@ I'm sure you can install `strace` on any other distributions easily.
 
 ### On the computer you want to generate the profile image
 
+Please note that you don't need to run `straceprof` where you run the profile target.
+
 ```bash
 $ pip install straceprof
 ```
@@ -110,3 +112,9 @@ Other options are:
   --width WIDTH         Width of the figure in pixels
   --height HEIGHT       Height of the figure in pixels
 ```
+
+## Restriction
+
+Because `straceprof` depends on `strace` and use `execve` and `exit_group` pair
+to calculate the duration of processes, `straceprof` fails to detect them
+sometimes.
