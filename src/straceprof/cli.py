@@ -45,7 +45,7 @@ def gen_text(p: Process, width_px: float, font_size: int) -> str:
     if len(text) <= n_chars:
         return text
     else:
-        return text[: n_chars] + "..."
+        return text[:n_chars] + "..."
 
 
 def gen_color_map(processes: list[Process]) -> dict[str, str]:
@@ -58,13 +58,21 @@ def gen_color_map(processes: list[Process]) -> dict[str, str]:
             histogram[program_name] = p.end_time - p.start_time
     colored_programs = list(histogram.items())
     colored_programs.sort(key=lambda x: x[1], reverse=True)
-    color_list = ["red", "orange", "yellow", "magenta", "purple", "blue", "cyan", "green"]
+    color_list = [
+        "red",
+        "orange",
+        "yellow",
+        "magenta",
+        "purple",
+        "blue",
+        "cyan",
+        "green",
+    ]
 
     color_map: dict[str, str] = {}
     for i in range(min(len(colored_programs), len(color_list))):
         color_map[colored_programs[i][0]] = color_list[i]
     return color_map
-
 
 
 def plot_processes(
@@ -182,7 +190,12 @@ def parse_execve_line(line: str) -> Process:
             full_command_in_log += c
         if c == "]":
             in_full_command = False
-    full_command = full_command_in_log.replace("[", "").replace("]", "").replace('"', "").replace(",", "")
+    full_command = (
+        full_command_in_log.replace("[", "")
+        .replace("]", "")
+        .replace('"', "")
+        .replace(",", "")
+    )
 
     return Process(
         pid=pid,
@@ -220,7 +233,7 @@ def get_processes_from_log(log_file: str) -> list[Process]:
     return legitimate_processes
 
 
-HELP_MESSAGE="""Generate a profile graph from strace log.
+HELP_MESSAGE = """Generate a profile graph from strace log.
 
 First, you need to generate a strace log file. You can generate a strace log
 file using the following command:
@@ -242,7 +255,9 @@ straceprof \\
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description=HELP_MESSAGE, formatter_class=argparse.RawTextHelpFormatter)
+    parser = argparse.ArgumentParser(
+        description=HELP_MESSAGE, formatter_class=argparse.RawTextHelpFormatter
+    )
     parser.add_argument("--log", type=str, help="strace log file", required=True)
     parser.add_argument(
         "--output_image", type=str, help="output plot file", required=True
