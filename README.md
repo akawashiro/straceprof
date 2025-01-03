@@ -78,4 +78,41 @@ $ pip3 install straceprof
 
 ## Usage
 
-TODO
+First, you need to generate a strace log file. You can generate a strace log
+file using the following command:
+
+> [!IMPORTANT]
+> Do not change the options for `strace` command other than `--output` and
+> `<command to profile>`. `straceprof` assumes you run `strace` with these
+> options.
+
+```
+strace \
+    --trace=execve,execveat,exit,exit_group \
+    --follow-forks \
+    --string-limit=1000 \
+    --absolute-timestamps=format:unix,precision:us \
+    --output=<path to strace log file> \
+    <command to profile>
+```
+
+Then, you can generate a profile graph using the following command:
+
+```
+straceprof \
+    --log=<path to strace log file> \
+    --output_image=<path to output image file>
+```
+
+Other options are:
+```
+  -h, --help            show this help message and exit
+  --log LOG             strace log file
+  --output_image OUTPUT_IMAGE
+                        output plot file
+  --minimum_duration_sec MINIMUM_DURATION_SEC
+                        The minimum duration of a process to be plotted. Shorter processes are omitted.
+  --title TITLE         Title of the plot. When you don't specify this, the path to the log file is used.
+  --width WIDTH         Width of the figure in pixels
+  --height HEIGHT       Height of the figure in pixels
+```
