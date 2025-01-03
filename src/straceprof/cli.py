@@ -7,6 +7,7 @@ from typing import Any
 import matplotlib.patches as patches
 import matplotlib.pyplot as plt
 
+
 logging.basicConfig(
     format="%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s",
     datefmt="%Y-%m-%d:%H:%M:%S",
