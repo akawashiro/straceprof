@@ -10,7 +10,7 @@ by `make`, `cmake`, shell scripts, or `docker build`.
 Run the following commands.
 ```bash
 $ sudo apt install strace
-$ pipx install straceprof
+$ pipx install git+https://github.com/akawashiro/straceprof
 $ strace \
     --output=straceprof.log \
     --trace=execve,execveat,exit,exit_group \
@@ -67,13 +67,7 @@ I'm sure you can install `strace` on any other distributions easily.
 ### On the computer you want to generate the profile image
 
 ```bash
-$ pipx install straceprof
-```
-
-or
-
-```
-$ pip3 install straceprof
+$ pipx install git+https://github.com/akawashiro/straceprof
 ```
 
 ## Usage
