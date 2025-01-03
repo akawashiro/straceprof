@@ -4,7 +4,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python ${{ matrix.python-version }}
@@ -21,5 +21,7 @@ jobs:
         run: black .
       - name: Check code formatting with isort
         run: isort .
+      - name: Check diff
+        run: git diff --exit-code
       - name: Check typing with mypy
         run: mypy .
