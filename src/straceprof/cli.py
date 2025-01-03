@@ -230,7 +230,6 @@ strace \\
     --trace=execve,execveat,exit,exit_group \\
     --follow-forks \\
     --string-limit=1000 \\
-    --timestamps=unix \\
     --absolute-timestamps=format:unix,precision:us \\
     <command to profile>
 
