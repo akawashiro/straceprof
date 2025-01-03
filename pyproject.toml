@@ -1,7 +1,12 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
 [project]
 name = "straceprof"
 version = "0.0.0"
 dependencies = ["matplotlib"]
+requires-python = ">=3.10"
 readme = "README.md"
 description = "Generate a profile graph from strace log"
 license = {file = "LICENSE"}
@@ -12,11 +17,10 @@ maintainers = [
   {name = "Akira Kawata"}
 ]
 keywords = ["strace", "profiling"]
+
 [project.urls]
 Repository = "https://github.com/akawashiro/straceprof"
 Issues = "https://github.com/akawashiro/straceprof/issues"
+
 [project.scripts]
 straceprof = "straceprof.cli:main"
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
