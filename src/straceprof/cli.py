@@ -240,11 +240,11 @@ First, you need to generate a strace log file. You can generate a strace log
 file using the following command:
 
 strace \\
-    --output=<path to strace log file> \\
     --trace=execve,execveat,exit,exit_group \\
     --follow-forks \\
     --string-limit=1000 \\
     --absolute-timestamps=format:unix,precision:us \\
+    --output=<path to strace log file> \\
     <command to profile>
 
 Then, you can generate a profile graph using the following command:
