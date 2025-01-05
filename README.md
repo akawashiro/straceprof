@@ -12,15 +12,15 @@ Run the following commands.
 $ sudo apt-get install strace
 $ pip install straceprof
 $ strace \
-    --output=straceprof.log \
     --trace=execve,execveat,exit,exit_group \
     --follow-forks \
     --string-limit=1000 \
     --absolute-timestamps=format:unix,precision:us \
+    --output=straceprof.log \
     <command to profile>
 $ straceprof \
     --log=straceprof.log \
-    --output_image=straceprof.png
+    --output=straceprof.png
 ```
 
 You will get a nice image!
@@ -95,16 +95,16 @@ Then, you can generate a profile graph using the following command:
 ```
 straceprof \
     --log=<path to strace log file> \
-    --output_image=<path to output image file>
+    --output=<path to output image file>
 ```
 
 Other options are:
 ```
   -h, --help            show this help message and exit
   --log LOG             strace log file
-  --output_image OUTPUT_IMAGE
+  --output              OUTPUT_IMAGE
                         output plot file
-  --minimum_duration_sec MINIMUM_DURATION_SEC
+  --minimum-duration-sec MINIMUM_DURATION_SEC
                         The minimum duration of a process to be plotted. Shorter processes are omitted.
   --title TITLE         Title of the plot. When you don't specify this, the path to the log file is used.
   --width WIDTH         Width of the figure in pixels
