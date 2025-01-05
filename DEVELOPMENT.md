@@ -15,6 +15,7 @@ $ python3 -m build
 ## Check the contents of the package
 ```
 $ tar -tvf dist/*.tar.gz
+$ zipinfo dist/*.whl
 ```
 
 ## Publish the package to test.pypi.org
@@ -27,5 +28,5 @@ Check [https://test.pypi.org/project/straceprof/](https://test.pypi.org/project/
 
 ## Publish the package to pypi.org
 ```
-$ python3 -m twine upload dist/*
+$ python3 -m twine upload dist/* --verbose
 ```
