@@ -261,7 +261,10 @@ def main() -> None:
     )
     parser.add_argument("--log", type=str, help="strace log file", required=True)
     parser.add_argument(
-        "--output", type=str, help="Filename of output image file. For example, profile.png.", required=True
+        "--output",
+        type=str,
+        help="Filename of output image file. For example, profile.png.",
+        required=True,
     )
     parser.add_argument(
         "--minimum-duration-sec",
