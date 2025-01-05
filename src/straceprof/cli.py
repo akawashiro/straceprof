@@ -292,7 +292,7 @@ def main() -> None:
     processes = get_processes_from_log(args.log)
     plot_processes(
         processes=processes,
-        image_file=args.output_image,
+        image_file=args.output,
         minimum_duration=args.minimum_duration_sec,
         title=title,
         width=args.width,
