@@ -251,7 +251,7 @@ Then, you can generate a profile graph using the following command:
 
 straceprof \\
     --log=<path to strace log file> \\
-    --output_image=<path to output image file>
+    --output=<path to output image file>
 """
 
 
@@ -261,10 +261,10 @@ def main() -> None:
     )
     parser.add_argument("--log", type=str, help="strace log file", required=True)
     parser.add_argument(
-        "--output_image", type=str, help="output plot file", required=True
+        "--output", type=str, help="Filename of output image file. For example, profile.png.", required=True
     )
     parser.add_argument(
-        "--minimum_duration_sec",
+        "--minimum-duration-sec",
         type=int,
         help="The minimum duration of a process to be plotted. Shorter processes are omitted.",
         default=5,
