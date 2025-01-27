@@ -123,7 +123,7 @@ def plot_processes(
 
     ax.set_xlim(0, max_time - offset_time)
     ax.set_xlabel("Time (sec)")
-    x_tick_interval = (width // 25) // 50 * 50 # heuristic
+    x_tick_interval = (width // 25) // 50 * 50  # heuristic
     ax.set_xticks(range(0, int(max_time - offset_time), x_tick_interval))
     ax.set_ylim(0, max_vcpu)
     ax.set_yticks([])
