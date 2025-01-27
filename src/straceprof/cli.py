@@ -33,7 +33,7 @@ def get_ax_width_and_height_in_pixels(fig: Any, ax: Any) -> tuple[int, int]:
 
 
 def gen_text(p: Process, width_px: float, font_size: int) -> str:
-    # TODO: This is huristic. We need to calculate the width of the text in
+    # TODO: This is heuristic. We need to calculate the width of the text in
     # pixels.
     font_width_in_pixels = font_size * 1.0
     n_chars = int(width_px / font_width_in_pixels) - 1
@@ -44,6 +44,8 @@ def gen_text(p: Process, width_px: float, font_size: int) -> str:
     text += f" (cmd: {p.full_command})"
 
     if len(text) <= n_chars:
+        n_repeat = n_chars // (len(text) + 1)
+        text = (text + " ") * n_repeat
         return text
     else:
         return text[:n_chars] + "..."
@@ -121,7 +123,8 @@ def plot_processes(
 
     ax.set_xlim(0, max_time - offset_time)
     ax.set_xlabel("Time (sec)")
-    ax.set_xticks(range(0, int(max_time - offset_time), 50))
+    x_tick_interval = (width // 25) // 50 * 50 # heuristic
+    ax.set_xticks(range(0, int(max_time - offset_time), x_tick_interval))
     ax.set_ylim(0, max_vcpu)
     ax.set_yticks([])
 
@@ -165,10 +168,12 @@ def plot_processes(
             fontsize=6,
             ha="center",
             va="center",
+            parse_math=False,
+            annotation_clip=True,
         )
 
     logging.debug(f"Saving the plot to {image_file} with title {title}")
-    fig.suptitle(title, fontsize=16, fontweight="bold", color="black")
+    fig.suptitle(title, fontsize=16, fontweight="bold", color="black", parse_math=False)
     fig.tight_layout()
     fig.savefig(image_file)
 
