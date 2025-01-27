@@ -15,7 +15,7 @@ $ strace \
     --trace=execve,execveat,exit,exit_group \
     --follow-forks \
     --string-limit=1000 \
-    --absolute-timestamps=format:unix,precision:us \
+    -ttt \
     --output=straceprof.log \
     <command to profile>
 $ straceprof \
@@ -80,7 +80,7 @@ strace \
     --trace=execve,execveat,exit,exit_group \
     --follow-forks \
     --string-limit=1000 \
-    --absolute-timestamps=format:unix,precision:us \
+    -ttt \
     --output=<path to strace log file> \
     <command to profile>
 ```
