@@ -43,7 +43,9 @@ def gen_text(p: Process, width_px: float, font_size: int) -> str:
     text += f" (PID: {p.pid})"
     text += f" (cmd: {p.full_command})"
 
-    if len(text) <= n_chars:
+    if width_px < 10:
+        return ""
+    elif len(text) <= n_chars:
         n_repeat = n_chars // (len(text) + 1)
         text = (text + " ") * n_repeat
         return text
