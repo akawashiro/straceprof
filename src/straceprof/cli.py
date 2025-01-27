@@ -234,6 +234,8 @@ def get_processes_from_log(log_file: str) -> list[Process]:
     return legitimate_processes
 
 
+# -ttt is equivalent to --absolute-timestamps=format:unix,precision:us. Old
+# strace does not support --absolute-timestamps option.
 HELP_MESSAGE = """Generate a profile graph from strace log.
 
 First, you need to generate a strace log file. You can generate a strace log
@@ -243,7 +245,7 @@ strace \\
     --trace=execve,execveat,exit,exit_group \\
     --follow-forks \\
     --string-limit=1000 \\
-    --absolute-timestamps=format:unix,precision:us \\
+    -ttt \\
     --output=<path to strace log file> \\
     <command to profile>
 
