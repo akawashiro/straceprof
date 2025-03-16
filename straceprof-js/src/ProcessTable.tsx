@@ -57,7 +57,7 @@ const ProcessTable: React.FC<ProcessTableProps> = ({ processes }) => {
                 </TableCell>
                 <TableCell
                   sx={{
-                    maxWidth: 300,
+                    maxWidth: 600,
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
                   }}

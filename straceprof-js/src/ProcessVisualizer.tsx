@@ -104,7 +104,7 @@ const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
   title = 'Process Visualization',
 }) => {
   const [minimumDuration, setMinimumDuration] = useState<number>(0);
-  const [visualizerWidth, setVisualizerWidth] = useState<number>(800);
+  const [visualizerWidth, setVisualizerWidth] = useState<number>(1200);
   const [visualizerHeight, setVisualizerHeight] = useState<number>(400);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 

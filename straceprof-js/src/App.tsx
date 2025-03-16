@@ -59,7 +59,7 @@ function App() {
   };
 
   return (
-    <Box sx={{ maxWidth: 800, mx: 'auto', p: 3, textAlign: 'center' }}>
+    <Box sx={{ width: '100%', p: 3, textAlign: 'center' }}>
       <Typography variant="h3" component="h1" gutterBottom>
         straceprof
       </Typography>
