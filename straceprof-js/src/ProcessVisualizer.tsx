@@ -1,13 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Process } from './ProcessUtils';
-import {
-  Box,
-  Typography,
-  Paper,
-  Divider,
-  Slider,
-  TextField,
-} from '@mui/material';
+import { Box, Typography, Paper, Slider, TextField } from '@mui/material';
 
 interface ProcessVisualizerProps {
   processes: Process[];
