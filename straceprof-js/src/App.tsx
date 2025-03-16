@@ -6,9 +6,6 @@ import {
   Card,
   CardContent,
   Divider,
-  Paper,
-  Slider,
-  TextField,
 } from '@mui/material';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import { Process, getProcessesFromLog } from './ProcessUtils';
@@ -22,9 +19,6 @@ function App() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [fileContent, setFileContent] = useState<string>(NPM_INSTALL_LOG);
   const [processes, setProcesses] = useState<Process[]>([]);
-  const [minimumDuration, setMinimumDuration] = useState<number>(0);
-  const [visualizerWidth, setVisualizerWidth] = useState<number>(800);
-  const [visualizerHeight, setVisualizerHeight] = useState<number>(400);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -110,67 +104,12 @@ function App() {
           )}
 
           {processes.length > 0 && (
-            <>
-              <Box sx={{ mt: 4, mb: 2 }}>
-                <Typography variant="h6" gutterBottom>
-                  Visualization Settings
-                </Typography>
-                <Divider sx={{ mb: 2 }} />
-
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <Typography sx={{ mr: 2, minWidth: 180 }}>
-                    Minimum Duration (sec):
-                  </Typography>
-                  <Slider
-                    value={minimumDuration}
-                    onChange={(_, value) => setMinimumDuration(value as number)}
-                    min={0}
-                    max={30}
-                    step={1}
-                    valueLabelDisplay="auto"
-                    sx={{ flex: 1 }}
-                  />
-                </Box>
-
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <Typography sx={{ mr: 2, minWidth: 180 }}>
-                    Visualization Width:
-                  </Typography>
-                  <TextField
-                    type="number"
-                    value={visualizerWidth}
-                    onChange={(e) => setVisualizerWidth(Number(e.target.value))}
-                    inputProps={{ min: 400, max: 2000, step: 100 }}
-                    size="small"
-                  />
-                </Box>
-
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <Typography sx={{ mr: 2, minWidth: 180 }}>
-                    Visualization Height:
-                  </Typography>
-                  <TextField
-                    type="number"
-                    value={visualizerHeight}
-                    onChange={(e) =>
-                      setVisualizerHeight(Number(e.target.value))
-                    }
-                    inputProps={{ min: 200, max: 1000, step: 50 }}
-                    size="small"
-                  />
-                </Box>
-              </Box>
-
-              <ProcessVisualizer
-                processes={processes}
-                minimumDuration={minimumDuration}
-                width={visualizerWidth}
-                height={visualizerHeight}
-                title={
-                  selectedFile ? selectedFile.name : 'Sample Log Visualization'
-                }
-              />
-            </>
+            <ProcessVisualizer
+              processes={processes}
+              title={
+                selectedFile ? selectedFile.name : 'Sample Log Visualization'
+              }
+            />
           )}
         </CardContent>
       </Card>

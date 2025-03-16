@@ -1,12 +1,16 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Process } from './ProcessUtils';
-import { Box, Typography, Paper } from '@mui/material';
+import {
+  Box,
+  Typography,
+  Paper,
+  Divider,
+  Slider,
+  TextField,
+} from '@mui/material';
 
 interface ProcessVisualizerProps {
   processes: Process[];
-  width?: number;
-  height?: number;
-  minimumDuration?: number;
   title?: string;
 }
 
@@ -97,11 +101,11 @@ function generateText(
  */
 const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
   processes,
-  width = 800,
-  height = 400,
-  minimumDuration = 0,
   title = 'Process Visualization',
 }) => {
+  const [minimumDuration, setMinimumDuration] = useState<number>(0);
+  const [visualizerWidth, setVisualizerWidth] = useState<number>(800);
+  const [visualizerHeight, setVisualizerHeight] = useState<number>(400);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   // Filter and sort processes
@@ -163,14 +167,14 @@ const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
 
     const xTickInterval = Math.max(Math.floor(timeRange / 10), 1);
     for (let t = 0; t <= timeRange; t += xTickInterval) {
-      const x = (t / timeRange) * width;
-      ctx.fillText(`${t}s`, x, height - 5);
+      const x = (t / timeRange) * visualizerWidth;
+      ctx.fillText(`${t}s`, x, visualizerHeight - 5);
 
       // Draw light grid line
       ctx.strokeStyle = '#EEEEEE';
       ctx.beginPath();
       ctx.moveTo(x, 0);
-      ctx.lineTo(x, height - 20);
+      ctx.lineTo(x, visualizerHeight - 20);
       ctx.stroke();
     }
 
@@ -184,11 +188,13 @@ const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
       const vcpu = processToVcpu[i];
 
       // Calculate rectangle dimensions
-      const startX = ((process.startTime - offsetTime) / timeRange) * width;
-      const endX = ((process.endTime - offsetTime) / timeRange) * width;
+      const startX =
+        ((process.startTime - offsetTime) / timeRange) * visualizerWidth;
+      const endX =
+        ((process.endTime - offsetTime) / timeRange) * visualizerWidth;
       const rectWidth = endX - startX;
 
-      const vcpuHeight = (height - 30) / maxVcpu;
+      const vcpuHeight = (visualizerHeight - 30) / maxVcpu;
       const startY = vcpu * vcpuHeight + 30;
 
       // Draw rectangle
@@ -215,13 +221,67 @@ const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
         ctx.fillText(text, textX, textY);
       }
     }
-  }, [filteredProcesses, width, height, minimumDuration, title]);
+  }, [
+    filteredProcesses,
+    visualizerWidth,
+    visualizerHeight,
+    minimumDuration,
+    title,
+  ]);
 
   return (
     <Paper elevation={3} sx={{ p: 2, mt: 3 }}>
       <Typography variant="h6" gutterBottom>
         Process Visualization ({filteredProcesses.length} processes)
       </Typography>
+
+      <Box sx={{ mt: 4, mb: 2 }}>
+        <Typography variant="h6" gutterBottom>
+          Visualization Settings
+        </Typography>
+        <Divider sx={{ mb: 2 }} />
+
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+          <Typography sx={{ mr: 2, minWidth: 180 }}>
+            Minimum Duration (sec):
+          </Typography>
+          <Slider
+            value={minimumDuration}
+            onChange={(_, value) => setMinimumDuration(value as number)}
+            min={0}
+            max={30}
+            step={1}
+            valueLabelDisplay="auto"
+            sx={{ flex: 1 }}
+          />
+        </Box>
+
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+          <Typography sx={{ mr: 2, minWidth: 180 }}>
+            Visualization Width:
+          </Typography>
+          <TextField
+            type="number"
+            value={visualizerWidth}
+            onChange={(e) => setVisualizerWidth(Number(e.target.value))}
+            inputProps={{ min: 400, max: 2000, step: 100 }}
+            size="small"
+          />
+        </Box>
+
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Typography sx={{ mr: 2, minWidth: 180 }}>
+            Visualization Height:
+          </Typography>
+          <TextField
+            type="number"
+            value={visualizerHeight}
+            onChange={(e) => setVisualizerHeight(Number(e.target.value))}
+            inputProps={{ min: 200, max: 1000, step: 50 }}
+            size="small"
+          />
+        </Box>
+      </Box>
 
       {filteredProcesses.length === 0 ? (
         <Typography variant="body1">
@@ -231,8 +291,8 @@ const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
         <Box sx={{ overflowX: 'auto' }}>
           <canvas
             ref={canvasRef}
-            width={width}
-            height={height}
+            width={visualizerWidth}
+            height={visualizerHeight}
             style={{
               border: '1px solid #ddd',
               borderRadius: '4px',
