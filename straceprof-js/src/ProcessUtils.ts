@@ -72,8 +72,12 @@ export function getProcessesFromLog(logContent: string): Process[] {
 
     // Check if this is an execve line (process start)
     if (words.length > 2 && words[2] === 'execve') {
-      const process = parseExecveLine(line);
-      processesMap[process.pid] = process;
+      try {
+        const process = parseExecveLine(line);
+        processesMap[process.pid] = process;
+      } catch (error) {
+        console.error('Error parsing execve line:', line, error);
+      }
     }
 
     // Check if this is an exit or exit_group line (process end)
@@ -81,11 +85,15 @@ export function getProcessesFromLog(logContent: string): Process[] {
       words.length > 2 &&
       (words[2] === 'exit' || words[2] === 'exit_group')
     ) {
-      const pid = parseInt(words[0], 10);
-      if (processesMap[pid]) {
-        processesMap[pid].endTime = parseFloat(words[1]);
-      } else {
-        console.warn(`Cannot find execve corresponding to PID ${pid}`);
+      try {
+        const pid = parseInt(words[0], 10);
+        if (processesMap[pid]) {
+          processesMap[pid].endTime = parseFloat(words[1]);
+        } else {
+          console.warn(`Cannot find execve corresponding to PID ${pid}`);
+        }
+      } catch (error) {
+        console.error('Error parsing exit line:', line, error);
       }
     }
   }
