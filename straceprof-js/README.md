@@ -16,6 +16,7 @@ A web-based visualization tool for strace logs. This is the JavaScript/web versi
 `straceprof-js` is a profiler designed for multi-process programs. It can visualize the execution of any process when you can run it under [strace](https://strace.io/). It is particularly well-suited for profiling build processes such as those initiated by `make`, `cmake`, shell scripts, or `docker build`.
 
 The web interface allows you to:
+
 - Upload strace log files
 - View a table of all processes with their details
 - Visualize the processes in a timeline view
@@ -32,6 +33,7 @@ The web interface allows you to:
 ### Installation Steps
 
 1. Clone the repository:
+
    ```bash
    git clone https://github.com/akawashiro/straceprof.git
    cd straceprof/straceprof-js
@@ -47,6 +49,7 @@ The web interface allows you to:
 ### Running the Application
 
 1. Start the development server:
+
    ```bash
    npm run dev
    ```

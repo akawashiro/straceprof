@@ -6,8 +6,12 @@ import {
   Card,
   CardContent,
   Divider,
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
 } from '@mui/material';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { Process, getProcessesFromLog } from './ProcessUtils';
 import { NPM_INSTALL_LOG } from './NpmInstallLog';
 import ProcessVisualizer from './ProcessVisualizer';
@@ -60,10 +64,6 @@ function App() {
 
   return (
     <Box sx={{ width: '100%', p: 3, textAlign: 'center' }}>
-      <Typography variant="h3" component="h1" gutterBottom>
-        straceprof
-      </Typography>
-
       <Card sx={{ mb: 3 }}>
         <CardContent>
           <Button
@@ -97,8 +97,6 @@ function App() {
             </Box>
           )}
 
-          {processes.length > 0 && <ProcessTable processes={processes} />}
-
           {fileContent && processes.length === 0 && (
             <NoProcessesFound fileContent={fileContent} />
           )}
@@ -112,11 +110,20 @@ function App() {
             />
           )}
         </CardContent>
-      </Card>
 
-      <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
-        straceprof - A profiling tool for strace
-      </Typography>
+        <Accordion>
+          <AccordionSummary
+            expandIcon={<ArrowDropDownIcon />}
+            aria-controls="panel2-content"
+            id="panel2-header"
+          >
+            <Typography component="span">Parsed Processes</Typography>
+          </AccordionSummary>
+          <AccordionDetails>
+            {processes.length > 0 && <ProcessTable processes={processes} />}
+          </AccordionDetails>
+        </Accordion>
+      </Card>
     </Box>
   );
 }

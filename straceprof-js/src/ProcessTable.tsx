@@ -7,7 +7,6 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Typography,
   Divider,
 } from '@mui/material';
 import { Process } from './ProcessUtils';
@@ -28,9 +27,6 @@ const ProcessTable: React.FC<ProcessTableProps> = ({ processes }) => {
         textAlign: 'left',
       }}
     >
-      <Typography variant="h6" gutterBottom>
-        Parsed Processes ({processes.length}):
-      </Typography>
       <Divider sx={{ mb: 2 }} />
 
       <TableContainer>
