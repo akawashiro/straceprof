@@ -1,0 +1,29 @@
+on: [push]
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Display Python version
+        run: python -c "import sys; print(sys.version)"
+      - name: Install pip
+        run: python -m pip install --upgrade pip
+      - name: Install dependencies
+        run: pip install black isort mypy
+      - name: Install straceprof
+        run: pip install ./straceprof-python
+      - name: Check code formatting with black
+        run: black straceprof-python
+      - name: Check code formatting with isort
+        run: isort straceprof-python
+      - name: Check diff
+        run: git diff --exit-code
+      - name: Check typing with mypy
+        run: mypy straceprof-python
