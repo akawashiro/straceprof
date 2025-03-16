@@ -18,12 +18,12 @@ jobs:
       - name: Install dependencies
         run: pip install black isort mypy
       - name: Install straceprof
-        run: pip install .
+        run: pip install straceprof-python
       - name: Check code formatting with black
-        run: black .
+        run: black straceprof-python
       - name: Check code formatting with isort
-        run: isort .
+        run: isort straceprof-python
       - name: Check diff
         run: git diff --exit-code
       - name: Check typing with mypy
-        run: mypy .
+        run: mypy straceprof-python
