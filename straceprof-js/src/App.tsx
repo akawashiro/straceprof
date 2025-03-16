@@ -16,11 +16,12 @@ import {
 } from '@mui/material';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import { Process, getProcessesFromLog } from './ProcessUtils';
+import { NPM_INSTALL_LOG } from './NpmInstallLog';
 import './App.css';
 
 function App() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [fileContent, setFileContent] = useState<string | null>(null);
+  const [fileContent, setFileContent] = useState<string>(NPM_INSTALL_LOG);
   const [processes, setProcesses] = useState<Process[]>([]);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
