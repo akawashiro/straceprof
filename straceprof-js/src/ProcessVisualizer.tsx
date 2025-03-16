@@ -231,16 +231,7 @@ const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
 
   return (
     <Paper elevation={3} sx={{ p: 2, mt: 3 }}>
-      <Typography variant="h6" gutterBottom>
-        Process Visualization ({filteredProcesses.length} processes)
-      </Typography>
-
       <Box sx={{ mt: 4, mb: 2 }}>
-        <Typography variant="h6" gutterBottom>
-          Visualization Settings
-        </Typography>
-        <Divider sx={{ mb: 2 }} />
-
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
           <Typography sx={{ mr: 2, minWidth: 180 }}>
             Minimum Duration (sec):
