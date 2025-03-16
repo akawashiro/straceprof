@@ -15,6 +15,7 @@ import { Process, getProcessesFromLog } from './ProcessUtils';
 import { NPM_INSTALL_LOG } from './NpmInstallLog';
 import ProcessVisualizer from './ProcessVisualizer';
 import ProcessTable from './ProcessTable';
+import NoProcessesFound from './NoProcessesFound';
 import './App.css';
 
 function App() {
@@ -105,31 +106,7 @@ function App() {
           {processes.length > 0 && <ProcessTable processes={processes} />}
 
           {fileContent && processes.length === 0 && (
-            <Paper
-              elevation={3}
-              sx={{
-                mt: 3,
-                p: 2,
-                maxHeight: '300px',
-                overflow: 'auto',
-                textAlign: 'left',
-              }}
-            >
-              <Typography variant="h6" gutterBottom>
-                File Content (No processes found):
-              </Typography>
-              <Divider sx={{ mb: 2 }} />
-              <Typography
-                component="pre"
-                sx={{
-                  fontFamily: 'monospace',
-                  whiteSpace: 'pre-wrap',
-                  wordBreak: 'break-all',
-                }}
-              >
-                {fileContent}
-              </Typography>
-            </Paper>
+            <NoProcessesFound fileContent={fileContent} />
           )}
 
           {processes.length > 0 && (
