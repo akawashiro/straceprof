@@ -27,9 +27,15 @@ jobs:
       - name: Build
         working-directory: straceprof-js
         run: npm run build
-      
-      - name: Deploy to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@v4
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          folder: straceprof-js/dist
-          branch: gh-pages
+          path: 'straceprof-js/dist'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
