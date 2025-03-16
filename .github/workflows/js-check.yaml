@@ -1,29 +1,22 @@
 name: JS Check
-
 on: [push]
-
 jobs:
   check:
     runs-on: ubuntu-latest
-    
     steps:
       - uses: actions/checkout@v4
-      
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
           cache-dependency-path: straceprof-js/package-lock.json
-      
       - name: Install dependencies
         working-directory: straceprof-js
         run: npm ci
-      
       - name: Run checks
         working-directory: straceprof-js
         run: npm run check
-      
       - name: Run tests
         working-directory: straceprof-js
         run: npm test
