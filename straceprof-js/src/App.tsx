@@ -7,12 +7,6 @@ import {
   CardContent,
   Divider,
   Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   Slider,
   TextField,
 } from '@mui/material';
@@ -20,6 +14,7 @@ import UploadFileIcon from '@mui/icons-material/UploadFile';
 import { Process, getProcessesFromLog } from './ProcessUtils';
 import { NPM_INSTALL_LOG } from './NpmInstallLog';
 import ProcessVisualizer from './ProcessVisualizer';
+import ProcessTable from './ProcessTable';
 import './App.css';
 
 function App() {
@@ -107,62 +102,7 @@ function App() {
             </Box>
           )}
 
-          {processes.length > 0 && (
-            <Paper
-              elevation={3}
-              sx={{
-                mt: 3,
-                p: 2,
-                maxHeight: '500px',
-                overflow: 'auto',
-                textAlign: 'left',
-              }}
-            >
-              <Typography variant="h6" gutterBottom>
-                Parsed Processes ({processes.length}):
-              </Typography>
-              <Divider sx={{ mb: 2 }} />
-
-              <TableContainer>
-                <Table size="small">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>PID</TableCell>
-                      <TableCell>Program</TableCell>
-                      <TableCell>Start Time</TableCell>
-                      <TableCell>End Time</TableCell>
-                      <TableCell>Duration (sec)</TableCell>
-                      <TableCell>Command</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {processes.map((process) => (
-                      <TableRow key={`${process.pid}-${process.startTime}`}>
-                        <TableCell>{process.pid}</TableCell>
-                        <TableCell>
-                          {process.program.split('/').pop()}
-                        </TableCell>
-                        <TableCell>{process.startTime.toFixed(6)}</TableCell>
-                        <TableCell>{process.endTime.toFixed(6)}</TableCell>
-                        <TableCell>
-                          {(process.endTime - process.startTime).toFixed(6)}
-                        </TableCell>
-                        <TableCell
-                          sx={{
-                            maxWidth: 300,
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                          }}
-                        >
-                          {process.fullCommand}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </Paper>
-          )}
+          {processes.length > 0 && <ProcessTable processes={processes} />}
 
           {fileContent && processes.length === 0 && (
             <Paper
