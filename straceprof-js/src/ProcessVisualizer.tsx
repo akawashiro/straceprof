@@ -1,6 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useLayoutEffect } from 'react';
 import { Process } from './ProcessUtils';
-import { Box, Typography, Paper, Slider, TextField } from '@mui/material';
+import { Box, Typography, Paper, Slider } from '@mui/material';
 
 interface ProcessVisualizerProps {
   processes: Process[];
@@ -80,13 +80,18 @@ function generateText(
     return text.substring(0, maxChars) + '...';
   }
 
-  // Repeat text to fill space if it's short
-  if (text.length <= maxChars / 2) {
-    const repeatCount = Math.floor(maxChars / (text.length + 1));
-    text = (text + ' ').repeat(repeatCount).trim();
-  }
+  // No longer repeating text to fill space
 
   return text;
+}
+
+// Interface for storing rectangle information for hover detection
+interface ProcessRect {
+  process: Process;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
 }
 
 /**
@@ -97,14 +102,72 @@ const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
   title = 'Process Visualization',
 }) => {
   const [minimumDuration, setMinimumDuration] = useState<number>(0);
-  const [visualizerWidth, setVisualizerWidth] = useState<number>(1200);
-  const [visualizerHeight, setVisualizerHeight] = useState<number>(400);
+  const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [dimensions, setDimensions] = useState({ width: 1200, height: 400 });
+
+  // State for hover functionality
+  const [processRects, setProcessRects] = useState<ProcessRect[]>([]);
+  const [hoveredProcess, setHoveredProcess] = useState<Process | null>(null);
+  const [mousePosition, setMousePosition] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
+
+  // Update dimensions when container size changes
+  useLayoutEffect(() => {
+    const handleResize = () => {
+      if (containerRef.current) {
+        const width = containerRef.current.clientWidth - 20; // Account for padding
+        // Set a reasonable height based on width
+        const height = Math.min(Math.max(width * 0.4, 300), 800);
+        setDimensions({ width, height });
+      }
+    };
+
+    handleResize(); // Initial size
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Filter and sort processes
   const filteredProcesses = processes
     .filter((p) => p.endTime - p.startTime >= minimumDuration)
     .sort((a, b) => a.startTime - b.startTime);
+
+  // Function to check if mouse is over a process rectangle
+  const checkHover = (x: number, y: number) => {
+    for (const rect of processRects) {
+      if (
+        x >= rect.x &&
+        x <= rect.x + rect.width &&
+        y >= rect.y &&
+        y <= rect.y + rect.height
+      ) {
+        setHoveredProcess(rect.process);
+        return;
+      }
+    }
+    setHoveredProcess(null);
+  };
+
+  // Mouse event handlers
+  const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (!canvasRef.current) return;
+
+    const canvas = canvasRef.current;
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    setMousePosition({ x: e.clientX, y: e.clientY });
+    checkHover(x, y);
+  };
+
+  const handleMouseLeave = () => {
+    setHoveredProcess(null);
+    setMousePosition(null);
+  };
 
   useEffect(() => {
     if (!canvasRef.current || filteredProcesses.length === 0) return;
@@ -113,8 +176,15 @@ const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
+    // Set canvas dimensions
+    canvas.width = dimensions.width;
+    canvas.height = dimensions.height;
+
     // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Reset process rectangles
+    const newProcessRects: ProcessRect[] = [];
 
     // Calculate time range
     let offsetTime = Number.MAX_SAFE_INTEGER;
@@ -160,14 +230,14 @@ const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
 
     const xTickInterval = Math.max(Math.floor(timeRange / 10), 1);
     for (let t = 0; t <= timeRange; t += xTickInterval) {
-      const x = (t / timeRange) * visualizerWidth;
-      ctx.fillText(`${t}s`, x, visualizerHeight - 5);
+      const x = (t / timeRange) * dimensions.width;
+      ctx.fillText(`${t}s`, x, dimensions.height - 5);
 
       // Draw light grid line
       ctx.strokeStyle = '#EEEEEE';
       ctx.beginPath();
       ctx.moveTo(x, 0);
-      ctx.lineTo(x, visualizerHeight - 20);
+      ctx.lineTo(x, dimensions.height - 20);
       ctx.stroke();
     }
 
@@ -182,13 +252,22 @@ const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
 
       // Calculate rectangle dimensions
       const startX =
-        ((process.startTime - offsetTime) / timeRange) * visualizerWidth;
+        ((process.startTime - offsetTime) / timeRange) * dimensions.width;
       const endX =
-        ((process.endTime - offsetTime) / timeRange) * visualizerWidth;
+        ((process.endTime - offsetTime) / timeRange) * dimensions.width;
       const rectWidth = endX - startX;
 
-      const vcpuHeight = (visualizerHeight - 30) / maxVcpu;
+      const vcpuHeight = (dimensions.height - 30) / maxVcpu;
       const startY = vcpu * vcpuHeight + 30;
+
+      // Store rectangle information for hover detection
+      newProcessRects.push({
+        process,
+        x: startX,
+        y: startY,
+        width: rectWidth,
+        height: vcpuHeight - 2,
+      });
 
       // Draw rectangle
       const programName = process.program.split('/').pop() || process.program;
@@ -202,9 +281,9 @@ const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
       // Draw text if rectangle is wide enough
       if (rectWidth > 10) {
         ctx.fillStyle = '#000000';
-        ctx.font = '10px Arial';
+        ctx.font = '12px Arial';
 
-        const text = generateText(process, rectWidth, 10);
+        const text = generateText(process, rectWidth, 12);
         const textX = startX + rectWidth / 2;
         const textY = startY + vcpuHeight / 2;
 
@@ -214,10 +293,13 @@ const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
         ctx.fillText(text, textX, textY);
       }
     }
+
+    // Update process rectangles state
+    setProcessRects(newProcessRects);
   }, [
     filteredProcesses,
-    visualizerWidth,
-    visualizerHeight,
+    dimensions.width,
+    dimensions.height,
     minimumDuration,
     title,
   ]);
@@ -239,32 +321,6 @@ const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
             sx={{ flex: 1 }}
           />
         </Box>
-
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-          <Typography sx={{ mr: 2, minWidth: 180 }}>
-            Visualization Width:
-          </Typography>
-          <TextField
-            type="number"
-            value={visualizerWidth}
-            onChange={(e) => setVisualizerWidth(Number(e.target.value))}
-            inputProps={{ min: 400, max: 2000, step: 100 }}
-            size="small"
-          />
-        </Box>
-
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <Typography sx={{ mr: 2, minWidth: 180 }}>
-            Visualization Height:
-          </Typography>
-          <TextField
-            type="number"
-            value={visualizerHeight}
-            onChange={(e) => setVisualizerHeight(Number(e.target.value))}
-            inputProps={{ min: 200, max: 1000, step: 50 }}
-            size="small"
-          />
-        </Box>
       </Box>
 
       {filteredProcesses.length === 0 ? (
@@ -272,17 +328,54 @@ const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
           No processes to display. Try reducing the minimum duration.
         </Typography>
       ) : (
-        <Box sx={{ overflowX: 'auto' }}>
-          <canvas
-            ref={canvasRef}
-            width={visualizerWidth}
-            height={visualizerHeight}
-            style={{
-              border: '1px solid #ddd',
-              borderRadius: '4px',
-              maxWidth: '100%',
-            }}
-          />
+        <Box sx={{ overflowX: 'auto' }} ref={containerRef}>
+          <Box sx={{ position: 'relative' }}>
+            <canvas
+              ref={canvasRef}
+              style={{
+                border: '1px solid #ddd',
+                borderRadius: '4px',
+                maxWidth: '100%',
+                height: 'auto',
+              }}
+              onMouseMove={handleMouseMove}
+              onMouseLeave={handleMouseLeave}
+            />
+            {hoveredProcess && mousePosition && (
+              <div
+                style={{
+                  position: 'fixed',
+                  top: mousePosition.y + 10,
+                  left: mousePosition.x + 10,
+                  backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                  color: 'white',
+                  padding: '8px',
+                  borderRadius: '4px',
+                  maxWidth: '400px',
+                  zIndex: 1000,
+                  pointerEvents: 'none',
+                }}
+              >
+                <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+                  {hoveredProcess.program.split('/').pop() ||
+                    hoveredProcess.program}
+                </Typography>
+                <Typography variant="body2">
+                  Duration:{' '}
+                  {Math.round(
+                    hoveredProcess.endTime - hoveredProcess.startTime
+                  )}{' '}
+                  sec
+                </Typography>
+                <Typography variant="body2">
+                  PID: {hoveredProcess.pid}
+                </Typography>
+                <Typography variant="body2" sx={{ wordBreak: 'break-word' }}>
+                  Command: {hoveredProcess.fullCommand}
+                </Typography>
+              </div>
+            )}
+          </Box>
         </Box>
       )}
     </Paper>

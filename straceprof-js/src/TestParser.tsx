@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { getProcessesFromLog } from './ProcessUtils';
-import { NPM_INSTALL_LOG } from './NpmInstallLog';
+import NPM_INSTALL_LOG from './npm_install.log?raw';
 
 /**
  * Test component to debug the process parsing
