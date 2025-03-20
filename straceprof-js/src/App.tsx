@@ -13,10 +13,11 @@ import {
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { Process, getProcessesFromLog } from './ProcessUtils';
-import { NPM_INSTALL_LOG } from './NpmInstallLog';
+import NPM_INSTALL_LOG from './npm_install.log?raw';
 import ProcessVisualizer from './ProcessVisualizer';
 import ProcessTable from './ProcessTable';
 import NoProcessesFound from './NoProcessesFound';
+import LINUX_BUILD_LOG from './linux_build_log.txt?raw';
 import './App.css';
 
 function App() {
