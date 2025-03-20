@@ -67,7 +67,7 @@ function generateText(
 
   const duration = Math.round(process.endTime - process.startTime);
 
-  let text = `${process.fullCommand} (${duration} sec)`;
+  const text = `${process.fullCommand} (${duration} sec)`;
 
   // Truncate if too long
   if (text.length > maxChars) {
