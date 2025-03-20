@@ -11,8 +11,6 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  Chip,
-  OutlinedInput,
   SelectChangeEvent,
 } from '@mui/material';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
@@ -35,13 +33,11 @@ function App() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [fileContent, setFileContent] = useState<string>('');
   const [processes, setProcesses] = useState<Process[]>([]);
-  const [selectedExamples, setSelectedExamples] = useState<string[]>([
-    'npm_install',
-  ]);
+  const [selectedExample, setSelectedExample] = useState<string>('npm_install');
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Parse logs when selected examples change
+  // Parse logs when selected example changes
   useEffect(() => {
     if (selectedFile) {
       // If a file is uploaded, don't use example logs
@@ -49,33 +45,31 @@ function App() {
     }
 
     try {
-      if (selectedExamples.length === 0) {
-        // No examples selected, clear processes
+      if (!selectedExample) {
+        // No example selected, clear processes
         setProcesses([]);
         setFileContent('');
         return;
       }
 
-      // Combine selected example logs
-      const combinedLogContent = selectedExamples
-        .map((example) => exampleLogs[example].data)
-        .join('\n');
+      // Use the selected example log
+      const logContent = exampleLogs[selectedExample].data;
 
-      setFileContent(combinedLogContent);
-      const parsedProcesses = getProcessesFromLog(combinedLogContent);
+      setFileContent(logContent);
+      const parsedProcesses = getProcessesFromLog(logContent);
       setProcesses(parsedProcesses);
     } catch (error) {
-      console.error('Error parsing example logs:', error);
+      console.error('Error parsing example log:', error);
     }
-  }, [selectedExamples, selectedFile]);
+  }, [selectedExample, selectedFile]);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] || null;
     setSelectedFile(file);
 
     if (file) {
-      // Clear selected examples when a file is uploaded
-      setSelectedExamples([]);
+      // Clear selected example when a file is uploaded
+      setSelectedExample('');
 
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -94,10 +88,9 @@ function App() {
     }
   };
 
-  const handleExampleChange = (event: SelectChangeEvent<string[]>) => {
-    const value = event.target.value;
-    setSelectedExamples(typeof value === 'string' ? [value] : value);
-    // Clear selected file when examples are selected
+  const handleExampleChange = (event: SelectChangeEvent<string>) => {
+    setSelectedExample(event.target.value);
+    // Clear selected file when an example is selected
     setSelectedFile(null);
   };
 
@@ -120,17 +113,9 @@ function App() {
           <InputLabel id="example-select-label">Example Logs</InputLabel>
           <Select
             labelId="example-select-label"
-            multiple
-            value={selectedExamples}
+            value={selectedExample}
             onChange={handleExampleChange}
-            input={<OutlinedInput label="Example Logs" />}
-            renderValue={(selected) => (
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                {selected.map((value) => (
-                  <Chip key={value} label={exampleLogs[value].name} />
-                ))}
-              </Box>
-            )}
+            label="Example Logs"
             MenuProps={{
               PaperProps: {
                 style: {
@@ -188,8 +173,8 @@ function App() {
           title={
             selectedFile
               ? selectedFile.name
-              : selectedExamples.length > 0
-                ? `${selectedExamples.map((ex) => exampleLogs[ex].name).join(' + ')} Visualization`
+              : selectedExample
+                ? `${exampleLogs[selectedExample].name} Visualization`
                 : 'Sample Log Visualization'
           }
         />
