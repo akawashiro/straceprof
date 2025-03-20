@@ -63,67 +63,61 @@ function App() {
   };
 
   return (
-    <Box sx={{ width: '100%', p: 3, textAlign: 'center' }}>
-      <Card sx={{ mb: 3 }}>
-        <CardContent>
-          <Button
-            variant="contained"
-            startIcon={<UploadFileIcon />}
-            onClick={handleUploadClick}
-            sx={{ mb: 2 }}
-          >
-            Upload File
-          </Button>
-          <input
-            type="file"
-            ref={fileInputRef}
-            onChange={handleFileChange}
-            style={{ display: 'none' }}
-          />
+    <Box sx={{ width: '100%', height: '100%', textAlign: 'center' }}>
+      <Button
+        variant="contained"
+        startIcon={<UploadFileIcon />}
+        onClick={handleUploadClick}
+        sx={{ mb: 2 }}
+      >
+        Upload File
+      </Button>
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileChange}
+        style={{ display: 'none' }}
+      />
 
-          {selectedFile && (
-            <Box sx={{ mt: 3, textAlign: 'left' }}>
-              <Typography variant="h6" gutterBottom>
-                File Information:
-              </Typography>
-              <Divider sx={{ mb: 2 }} />
-              <Typography variant="body1">Name: {selectedFile.name}</Typography>
-              <Typography variant="body1">
-                Size: {(selectedFile.size / 1024).toFixed(2)} KB
-              </Typography>
-              <Typography variant="body1">
-                Type: {selectedFile.type || 'Unknown'}
-              </Typography>
-            </Box>
-          )}
+      {selectedFile && (
+        <Box sx={{ mt: 3, textAlign: 'left' }}>
+          <Typography variant="h6" gutterBottom>
+            File Information:
+          </Typography>
+          <Divider sx={{ mb: 2 }} />
+          <Typography variant="body1">Name: {selectedFile.name}</Typography>
+          <Typography variant="body1">
+            Size: {(selectedFile.size / 1024).toFixed(2)} KB
+          </Typography>
+          <Typography variant="body1">
+            Type: {selectedFile.type || 'Unknown'}
+          </Typography>
+        </Box>
+      )}
 
-          {fileContent && processes.length === 0 && (
-            <NoProcessesFound fileContent={fileContent} />
-          )}
+      {fileContent && processes.length === 0 && (
+        <NoProcessesFound fileContent={fileContent} />
+      )}
 
-          {processes.length > 0 && (
-            <ProcessVisualizer
-              processes={processes}
-              title={
-                selectedFile ? selectedFile.name : 'Sample Log Visualization'
-              }
-            />
-          )}
-        </CardContent>
+      {processes.length > 0 && (
+        <ProcessVisualizer
+          processes={processes}
+          title={selectedFile ? selectedFile.name : 'Sample Log Visualization'}
+        />
+      )}
 
-        <Accordion>
-          <AccordionSummary
-            expandIcon={<ArrowDropDownIcon />}
-            aria-controls="panel2-content"
-            id="panel2-header"
-          >
-            <Typography component="span">Parsed Processes</Typography>
-          </AccordionSummary>
-          <AccordionDetails>
-            {processes.length > 0 && <ProcessTable processes={processes} />}
-          </AccordionDetails>
-        </Accordion>
-      </Card>
+      <Accordion>
+        <AccordionSummary
+          expandIcon={<ArrowDropDownIcon />}
+          aria-controls="panel2-content"
+          id="panel2-header"
+        >
+          <Typography component="span">Parsed Processes</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          {processes.length > 0 && <ProcessTable processes={processes} />}
+        </AccordionDetails>
+      </Accordion>
     </Box>
   );
 }
