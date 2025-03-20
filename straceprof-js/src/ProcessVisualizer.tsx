@@ -5,8 +5,6 @@ import {
   Typography,
   Paper,
   Slider,
-  TextField,
-  Tooltip,
 } from '@mui/material';
 
 interface ProcessVisualizerProps {
