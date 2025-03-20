@@ -35,7 +35,9 @@ function App() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [fileContent, setFileContent] = useState<string>('');
   const [processes, setProcesses] = useState<Process[]>([]);
-  const [selectedExamples, setSelectedExamples] = useState<string[]>(['npm_install']);
+  const [selectedExamples, setSelectedExamples] = useState<string[]>([
+    'npm_install',
+  ]);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -56,7 +58,7 @@ function App() {
 
       // Combine selected example logs
       const combinedLogContent = selectedExamples
-        .map(example => exampleLogs[example].data)
+        .map((example) => exampleLogs[example].data)
         .join('\n');
 
       setFileContent(combinedLogContent);
@@ -105,7 +107,15 @@ function App() {
 
   return (
     <Box sx={{ width: '100%', height: '100%', textAlign: 'center' }}>
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 2, mb: 2 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          gap: 2,
+          mb: 2,
+        }}
+      >
         <FormControl sx={{ minWidth: 200 }}>
           <InputLabel id="example-select-label">Example Logs</InputLabel>
           <Select
@@ -179,7 +189,7 @@ function App() {
             selectedFile
               ? selectedFile.name
               : selectedExamples.length > 0
-                ? `${selectedExamples.map(ex => exampleLogs[ex].name).join(' + ')} Visualization`
+                ? `${selectedExamples.map((ex) => exampleLogs[ex].name).join(' + ')} Visualization`
                 : 'Sample Log Visualization'
           }
         />
