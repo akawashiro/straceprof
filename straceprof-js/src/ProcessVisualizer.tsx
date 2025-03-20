@@ -65,15 +65,9 @@ function generateText(
     return '';
   }
 
-  const programName = process.program.split('/').pop() || process.program;
   const duration = Math.round(process.endTime - process.startTime);
 
-  let text = `${programName} (${duration} sec) (PID: ${process.pid})`;
-
-  // Add command if there's space
-  if (text.length < maxChars - 10) {
-    text += ` (cmd: ${process.fullCommand})`;
-  }
+  const text = `${process.fullCommand} (${duration} sec)`;
 
   // Truncate if too long
   if (text.length > maxChars) {
@@ -179,13 +173,6 @@ const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Set canvas dimensions
-    canvas.width = canvasDimensions.width;
-    canvas.height = canvasDimensions.height;
-
-    // Clear canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
     // Reset process rectangles
     const newProcessRects: ProcessRect[] = [];
 
@@ -223,6 +210,13 @@ const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
     }
 
     const maxVcpu = Math.max(...processToVcpu) + 1;
+
+    // Set canvas dimensions
+    canvas.width = canvasDimensions.width;
+    canvas.height = Math.max(maxVcpu * 20, canvasDimensions.height);
+
+    // Clear canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // Generate color map
     const colorMap = generateColorMap(filteredProcesses);
@@ -360,21 +354,15 @@ const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
                   pointerEvents: 'none',
                 }}
               >
-                <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
-                  {hoveredProcess.program.split('/').pop() ||
-                    hoveredProcess.program}
-                </Typography>
-                <Typography variant="body2">
+                <Typography>
                   Duration:{' '}
                   {Math.round(
                     hoveredProcess.endTime - hoveredProcess.startTime
                   )}{' '}
                   sec
                 </Typography>
-                <Typography variant="body2">
-                  PID: {hoveredProcess.pid}
-                </Typography>
-                <Typography variant="body2" sx={{ wordBreak: 'break-word' }}>
+                <Typography>PID: {hoveredProcess.pid}</Typography>
+                <Typography sx={{ wordBreak: 'break-word' }}>
                   Command: {hoveredProcess.fullCommand}
                 </Typography>
               </div>
