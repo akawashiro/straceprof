@@ -179,13 +179,6 @@ const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Set canvas dimensions
-    canvas.width = canvasDimensions.width;
-    canvas.height = canvasDimensions.height;
-
-    // Clear canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
     // Reset process rectangles
     const newProcessRects: ProcessRect[] = [];
 
@@ -223,6 +216,13 @@ const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
     }
 
     const maxVcpu = Math.max(...processToVcpu) + 1;
+
+    // Set canvas dimensions
+    canvas.width = canvasDimensions.width;
+    canvas.height = Math.max(maxVcpu * 20, canvasDimensions.height);
+
+    // Clear canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // Generate color map
     const colorMap = generateColorMap(filteredProcesses);
