@@ -4,9 +4,6 @@ import {
   Box,
   Typography,
   Divider,
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
   FormControl,
   InputLabel,
   Select,
@@ -15,10 +12,8 @@ import {
   CircularProgress,
 } from '@mui/material';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { Process, getProcessesFromLog } from './ProcessUtils';
 import ProcessVisualizer from './ProcessVisualizer';
-import ProcessTable from './ProcessTable';
 import NoProcessesFound from './NoProcessesFound';
 import { fetchLog } from './LogUtils';
 import './App.css';
@@ -190,19 +185,6 @@ function App() {
           }
         />
       )}
-
-      <Accordion>
-        <AccordionSummary
-          expandIcon={<ArrowDropDownIcon />}
-          aria-controls="panel2-content"
-          id="panel2-header"
-        >
-          <Typography component="span">Parsed Processes</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          {processes.length > 0 && <ProcessTable processes={processes} />}
-        </AccordionDetails>
-      </Accordion>
     </Box>
   );
 }
