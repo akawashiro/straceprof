@@ -65,15 +65,9 @@ function generateText(
     return '';
   }
 
-  const programName = process.program.split('/').pop() || process.program;
   const duration = Math.round(process.endTime - process.startTime);
 
-  let text = `${programName} (${duration} sec) (PID: ${process.pid})`;
-
-  // Add command if there's space
-  if (text.length < maxChars - 10) {
-    text += ` (cmd: ${process.fullCommand})`;
-  }
+  let text = `${process.fullCommand} (${duration} sec)`;
 
   // Truncate if too long
   if (text.length > maxChars) {
@@ -360,21 +354,15 @@ const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
                   pointerEvents: 'none',
                 }}
               >
-                <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
-                  {hoveredProcess.program.split('/').pop() ||
-                    hoveredProcess.program}
-                </Typography>
-                <Typography variant="body2">
+                <Typography>
                   Duration:{' '}
                   {Math.round(
                     hoveredProcess.endTime - hoveredProcess.startTime
                   )}{' '}
                   sec
                 </Typography>
-                <Typography variant="body2">
-                  PID: {hoveredProcess.pid}
-                </Typography>
-                <Typography variant="body2" sx={{ wordBreak: 'break-word' }}>
+                <Typography>PID: {hoveredProcess.pid}</Typography>
+                <Typography sx={{ wordBreak: 'break-word' }}>
                   Command: {hoveredProcess.fullCommand}
                 </Typography>
               </div>
