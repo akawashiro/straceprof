@@ -80,11 +80,7 @@ function generateText(
     return text.substring(0, maxChars) + '...';
   }
 
-  // Repeat text to fill space if it's short
-  if (text.length <= maxChars / 2) {
-    const repeatCount = Math.floor(maxChars / (text.length + 1));
-    text = (text + ' ').repeat(repeatCount).trim();
-  }
+  // No longer repeating text to fill space
 
   return text;
 }
@@ -222,9 +218,9 @@ const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
       // Draw text if rectangle is wide enough
       if (rectWidth > 10) {
         ctx.fillStyle = '#000000';
-        ctx.font = '10px Arial';
+        ctx.font = '12px Arial';
 
-        const text = generateText(process, rectWidth, 10);
+        const text = generateText(process, rectWidth, 12);
         const textX = startX + rectWidth / 2;
         const textY = startY + vcpuHeight / 2;
 
