@@ -104,7 +104,10 @@ const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
   const [minimumDuration, setMinimumDuration] = useState<number>(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [dimensions, setDimensions] = useState({ width: 1200, height: 400 });
+  const [canvasDimensions, setDimensions] = useState({
+    width: 1200,
+    height: 400,
+  });
 
   // State for hover functionality
   const [processRects, setProcessRects] = useState<ProcessRect[]>([]);
@@ -118,9 +121,9 @@ const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
   useLayoutEffect(() => {
     const handleResize = () => {
       if (containerRef.current) {
-        const width = containerRef.current.clientWidth - 20; // Account for padding
-        // Set a reasonable height based on width
-        const height = Math.min(Math.max(width * 0.4, 300), 800);
+        // 50 is subtracted to account for padding
+        const width = containerRef.current.clientWidth - 50;
+        const height = containerRef.current.clientHeight - 50;
         setDimensions({ width, height });
       }
     };
@@ -177,8 +180,8 @@ const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
     if (!ctx) return;
 
     // Set canvas dimensions
-    canvas.width = dimensions.width;
-    canvas.height = dimensions.height;
+    canvas.width = canvasDimensions.width;
+    canvas.height = canvasDimensions.height;
 
     // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -230,14 +233,14 @@ const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
 
     const xTickInterval = Math.max(Math.floor(timeRange / 10), 1);
     for (let t = 0; t <= timeRange; t += xTickInterval) {
-      const x = (t / timeRange) * dimensions.width;
-      ctx.fillText(`${t}s`, x, dimensions.height - 5);
+      const x = (t / timeRange) * canvasDimensions.width;
+      ctx.fillText(`${t}s`, x, canvasDimensions.height - 5);
 
       // Draw light grid line
       ctx.strokeStyle = '#EEEEEE';
       ctx.beginPath();
       ctx.moveTo(x, 0);
-      ctx.lineTo(x, dimensions.height - 20);
+      ctx.lineTo(x, canvasDimensions.height - 20);
       ctx.stroke();
     }
 
@@ -252,12 +255,12 @@ const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
 
       // Calculate rectangle dimensions
       const startX =
-        ((process.startTime - offsetTime) / timeRange) * dimensions.width;
+        ((process.startTime - offsetTime) / timeRange) * canvasDimensions.width;
       const endX =
-        ((process.endTime - offsetTime) / timeRange) * dimensions.width;
+        ((process.endTime - offsetTime) / timeRange) * canvasDimensions.width;
       const rectWidth = endX - startX;
 
-      const vcpuHeight = (dimensions.height - 30) / maxVcpu;
+      const vcpuHeight = (canvasDimensions.height - 30) / maxVcpu;
       const startY = vcpu * vcpuHeight + 30;
 
       // Store rectangle information for hover detection
@@ -298,8 +301,8 @@ const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
     setProcessRects(newProcessRects);
   }, [
     filteredProcesses,
-    dimensions.width,
-    dimensions.height,
+    canvasDimensions.width,
+    canvasDimensions.height,
     minimumDuration,
     title,
   ]);
@@ -309,9 +312,10 @@ const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
       <Box sx={{ mt: 4, mb: 2 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
           <Typography sx={{ mr: 2, minWidth: 180 }}>
-            Minimum Duration (sec):
+            Threshold to show processes (sec):
           </Typography>
           <Slider
+            size="small"
             value={minimumDuration}
             onChange={(_, value) => setMinimumDuration(value as number)}
             min={0}
