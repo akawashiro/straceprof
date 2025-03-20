@@ -12,21 +12,21 @@ import {
   Select,
   MenuItem,
   SelectChangeEvent,
+  CircularProgress,
 } from '@mui/material';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { Process, getProcessesFromLog } from './ProcessUtils';
-import NPM_INSTALL_LOG from './npm_install.log?raw';
 import ProcessVisualizer from './ProcessVisualizer';
 import ProcessTable from './ProcessTable';
 import NoProcessesFound from './NoProcessesFound';
-import LINUX_BUILD_LOG from './linux_build_log.txt?raw';
+import { fetchLog } from './LogUtils';
 import './App.css';
 
-// Mapping of example names to their display names and log data
-const exampleLogs: Record<string, { name: string; data: string }> = {
-  npm_install: { name: 'NPM Install', data: NPM_INSTALL_LOG },
-  linux_build: { name: 'Linux Build', data: LINUX_BUILD_LOG },
+// Mapping of example names to their display names and log file paths
+const exampleLogs: Record<string, { name: string; path: string }> = {
+  npm_install: { name: 'NPM Install', path: 'npm_install.log' },
+  linux_build: { name: 'Linux Build', path: 'linux_build_log.txt' },
 };
 
 function App() {
@@ -34,33 +34,38 @@ function App() {
   const [fileContent, setFileContent] = useState<string>('');
   const [processes, setProcesses] = useState<Process[]>([]);
   const [selectedExample, setSelectedExample] = useState<string>('npm_install');
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Parse logs when selected example changes
+  // Fetch and parse logs when selected example changes
   useEffect(() => {
     if (selectedFile) {
       // If a file is uploaded, don't use example logs
       return;
     }
 
-    try {
-      if (!selectedExample) {
-        // No example selected, clear processes
-        setProcesses([]);
-        setFileContent('');
-        return;
-      }
-
-      // Use the selected example log
-      const logContent = exampleLogs[selectedExample].data;
-
-      setFileContent(logContent);
-      const parsedProcesses = getProcessesFromLog(logContent);
-      setProcesses(parsedProcesses);
-    } catch (error) {
-      console.error('Error parsing example log:', error);
+    if (!selectedExample) {
+      // No example selected, clear processes
+      setProcesses([]);
+      setFileContent('');
+      return;
     }
+
+    // Fetch the selected example log
+    setIsLoading(true);
+    fetchLog(exampleLogs[selectedExample].path)
+      .then((logContent) => {
+        setFileContent(logContent);
+        const parsedProcesses = getProcessesFromLog(logContent);
+        setProcesses(parsedProcesses);
+      })
+      .catch((error) => {
+        console.error('Error fetching example log:', error);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
   }, [selectedExample, selectedFile]);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -115,7 +120,7 @@ function App() {
             labelId="example-select-label"
             value={selectedExample}
             onChange={handleExampleChange}
-            label="Example Logs"
+            label="Example Log"
             MenuProps={{
               PaperProps: {
                 style: {
@@ -163,11 +168,17 @@ function App() {
         </Box>
       )}
 
-      {fileContent && processes.length === 0 && (
+      {isLoading && (
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+          <CircularProgress />
+        </Box>
+      )}
+
+      {!isLoading && fileContent && processes.length === 0 && (
         <NoProcessesFound fileContent={fileContent} />
       )}
 
-      {processes.length > 0 && (
+      {!isLoading && processes.length > 0 && (
         <ProcessVisualizer
           processes={processes}
           title={
