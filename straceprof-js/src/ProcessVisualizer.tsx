@@ -4,8 +4,9 @@ import {
   calculateThresholdToShowProcess,
   calculateProcessVcpuAllocation,
 } from './ProcessUtils';
-import { Box, Typography, Slider } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import ProcessCanvas from './ProcessCanvas';
+import ProcessCanvasController from './ProcessCanvasController';
 
 interface ProcessVisualizerProps {
   processes: Process[];
@@ -95,51 +96,14 @@ const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
   return (
     <Box>
       <Box sx={{ mt: 4, mb: 2 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-          <Typography sx={{ mr: 2, minWidth: 180 }}>
-            Threshold to show processes (sec):
-          </Typography>
-          <Slider
-            size="small"
-            value={thresholdToShowProcess}
-            onChange={(_, value) => setthresholdToShowProcess(value as number)}
-            min={0}
-            max={30}
-            step={1}
-            valueLabelDisplay="auto"
-            sx={{ flex: 1 }}
-          />
-        </Box>
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-          <Typography sx={{ mr: 2, minWidth: 180 }}>
-            Canvas Width (px):
-          </Typography>
-          <Slider
-            size="small"
-            value={canvasDimensions.width}
-            onChange={handleWidthChange}
-            min={400}
-            max={2000}
-            step={50}
-            valueLabelDisplay="auto"
-            sx={{ flex: 1 }}
-          />
-        </Box>
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-          <Typography sx={{ mr: 2, minWidth: 180 }}>
-            Canvas Height (px):
-          </Typography>
-          <Slider
-            size="small"
-            value={canvasDimensions.height}
-            onChange={handleHeightChange}
-            min={200}
-            max={1200}
-            step={50}
-            valueLabelDisplay="auto"
-            sx={{ flex: 1 }}
-          />
-        </Box>
+        <ProcessCanvasController
+          thresholdToShowProcess={thresholdToShowProcess}
+          canvasWidth={canvasDimensions.width}
+          canvasHeight={canvasDimensions.height}
+          onThresholdChange={(value) => setthresholdToShowProcess(value)}
+          onWidthChange={handleWidthChange}
+          onHeightChange={handleHeightChange}
+        />
       </Box>
 
       {processes.length === 0 ? (
