@@ -1,3 +1,8 @@
+/**
+ * Maximum number of processes to display in the visualization
+ */
+export const MAX_PROCESSES_TO_DISPLAY = 100;
+
 // Define the Process type to store information about each process
 export type Process = {
   pid: number;
@@ -110,4 +115,28 @@ export function getProcessesFromLog(logContent: string): Process[] {
   }
 
   return legitimateProcesses;
+}
+
+/**
+ * Calculate threshold to show at most MAX_PROCESSES_TO_DISPLAY processes
+ * @param processes Array of Process objects
+ * @returns Threshold in seconds
+ */
+export function calculateThresholdToShowProcess(processes: Process[]): number {
+  // If we have MAX_PROCESSES_TO_DISPLAY or fewer processes, show all of them
+  if (processes.length <= MAX_PROCESSES_TO_DISPLAY) {
+    return 0;
+  }
+
+  // Calculate duration for each process
+  const processDurations = processes.map((p) => p.endTime - p.startTime);
+
+  // Sort durations in descending order
+  processDurations.sort((a, b) => b - a);
+
+  // Get the duration of the process at the MAX_PROCESSES_TO_DISPLAY index (0-indexed array)
+  const thresholdDuration = processDurations[MAX_PROCESSES_TO_DISPLAY - 1];
+
+  // Return the threshold (rounded to nearest integer for better UX)
+  return Math.ceil(thresholdDuration);
 }

@@ -1,5 +1,5 @@
-import React, { useRef, useState } from 'react';
-import { Process } from './ProcessUtils';
+import React, { useRef, useState, useEffect } from 'react';
+import { Process, calculateThresholdToShowProcess } from './ProcessUtils';
 import { Box, Typography, Slider } from '@mui/material';
 import ProcessCanvas from './ProcessCanvas';
 
@@ -17,6 +17,12 @@ const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
 }) => {
   const [thresholdToShowProcess, setthresholdToShowProcess] =
     useState<number>(0);
+
+  // Calculate and set the initial threshold when processes change
+  useEffect(() => {
+    const calculatedThreshold = calculateThresholdToShowProcess(processes);
+    setthresholdToShowProcess(calculatedThreshold);
+  }, [processes]);
   const containerRef = useRef<HTMLDivElement>(null);
   const [canvasDimensions, setDimensions] = useState({
     width: 1200,
