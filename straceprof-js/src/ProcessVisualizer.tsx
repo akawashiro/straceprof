@@ -174,6 +174,7 @@ const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
               <Typography variant="body2" sx={{ wordBreak: 'break-word' }}>
                 Command: {hoveredProcess.fullCommand}
               </Typography>
+              <Typography variant="body2">PID: {hoveredProcess.pid}</Typography>
               <Typography variant="body2">
                 Duration:{' '}
                 {Math.round(hoveredProcess.endTime - hoveredProcess.startTime)}{' '}
