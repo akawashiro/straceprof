@@ -29,6 +29,18 @@ const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
     height: 800,
   });
 
+  // Set initial canvas width based on window size
+  useEffect(() => {
+    // Set initial width to 90% of window width, with min/max constraints
+    const windowWidth = window.innerWidth;
+    const initialWidth = Math.min(Math.max(windowWidth * 0.9, 400), 2000);
+
+    setDimensions((prev) => ({
+      ...prev,
+      width: initialWidth,
+    }));
+  }, []); // Empty dependency array means this runs once on mount
+
   // State for hover functionality
   const [hoveredProcess, setHoveredProcess] = useState<Process | null>(null);
   const [mousePosition, setMousePosition] = useState<{
