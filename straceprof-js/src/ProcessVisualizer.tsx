@@ -15,7 +15,8 @@ const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
   processes,
   title = 'Process Visualization',
 }) => {
-  const [minimumDuration, setMinimumDuration] = useState<number>(0);
+  const [thresholdToShowProcess, setthresholdToShowProcess] =
+    useState<number>(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const [canvasDimensions, setDimensions] = useState({
     width: 1200,
@@ -62,8 +63,8 @@ const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
           </Typography>
           <Slider
             size="small"
-            value={minimumDuration}
-            onChange={(_, value) => setMinimumDuration(value as number)}
+            value={thresholdToShowProcess}
+            onChange={(_, value) => setthresholdToShowProcess(value as number)}
             min={0}
             max={30}
             step={1}
@@ -114,7 +115,7 @@ const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
             width={canvasDimensions.width}
             height={canvasDimensions.height}
             title={title}
-            minimumDuration={minimumDuration}
+            thresholdToShowProcess={thresholdToShowProcess}
             onHover={handleHover}
           />
           {hoveredProcess && mousePosition && (
