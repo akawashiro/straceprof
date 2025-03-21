@@ -132,12 +132,17 @@ function App() {
           </Select>
         </FormControl>
 
+        <Typography>
+          Take a strace log using strace --trace=execve,execveat,exit,exit_group
+          --follow-forks --string-limit=1000 -ttt --output=straceprof.log
+          "command to profile" and upload log:{' '}
+        </Typography>
         <Button
           variant="contained"
           startIcon={<UploadFileIcon />}
           onClick={handleUploadClick}
         >
-          Upload File
+          Upload log
         </Button>
       </Box>
       <input

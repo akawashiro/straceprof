@@ -308,7 +308,7 @@ const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
   ]);
 
   return (
-    <Paper elevation={3} sx={{ p: 2, mt: 3 }}>
+    <Box>
       <Box sx={{ mt: 4, mb: 2 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
           <Typography sx={{ mr: 2, minWidth: 180 }}>
@@ -382,7 +382,7 @@ const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
           </Box>
         </Box>
       )}
-    </Paper>
+    </Box>
   );
 };
 
