@@ -1,5 +1,5 @@
-import React, { useRef, useState } from 'react';
-import { Process } from './ProcessUtils';
+import React, { useRef, useState, useEffect } from 'react';
+import { Process, calculateThresholdToShowProcess } from './ProcessUtils';
 import { Box, Typography, Slider } from '@mui/material';
 import ProcessCanvas from './ProcessCanvas';
 
@@ -15,7 +15,14 @@ const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
   processes,
   title = 'Process Visualization',
 }) => {
-  const [minimumDuration, setMinimumDuration] = useState<number>(0);
+  const [thresholdToShowProcess, setthresholdToShowProcess] =
+    useState<number>(0);
+
+  // Calculate and set the initial threshold when processes change
+  useEffect(() => {
+    const calculatedThreshold = calculateThresholdToShowProcess(processes);
+    setthresholdToShowProcess(calculatedThreshold);
+  }, [processes]);
   const containerRef = useRef<HTMLDivElement>(null);
   const [canvasDimensions, setDimensions] = useState({
     width: 1200,
@@ -62,8 +69,8 @@ const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
           </Typography>
           <Slider
             size="small"
-            value={minimumDuration}
-            onChange={(_, value) => setMinimumDuration(value as number)}
+            value={thresholdToShowProcess}
+            onChange={(_, value) => setthresholdToShowProcess(value as number)}
             min={0}
             max={30}
             step={1}
@@ -114,7 +121,7 @@ const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
             width={canvasDimensions.width}
             height={canvasDimensions.height}
             title={title}
-            minimumDuration={minimumDuration}
+            thresholdToShowProcess={thresholdToShowProcess}
             onHover={handleHover}
           />
           {hoveredProcess && mousePosition && (
