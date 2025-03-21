@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Process, calculateProcessVcpuAllocation } from './ProcessUtils';
-import { Box, Typography } from '@mui/material';
+import { Box } from '@mui/material';
 
 interface ProcessCanvasProps {
   processes: Process[];
@@ -108,9 +108,8 @@ const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  // State for hover functionality
+  // State for hover detection
   const [processRects, setProcessRects] = useState<ProcessRect[]>([]);
-  const [hoveredProcess, setHoveredProcess] = useState<Process | null>(null);
   const [mousePosition, setMousePosition] = useState<{
     x: number;
     y: number;
@@ -130,14 +129,12 @@ const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
         y >= rect.y &&
         y <= rect.y + rect.height
       ) {
-        setHoveredProcess(rect.process);
         if (onHover) {
           onHover(rect.process, mousePosition);
         }
         return;
       }
     }
-    setHoveredProcess(null);
     if (onHover) {
       onHover(null, null);
     }
@@ -157,7 +154,6 @@ const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
   };
 
   const handleMouseLeave = () => {
-    setHoveredProcess(null);
     setMousePosition(null);
     if (onHover) {
       onHover(null, null);
@@ -303,31 +299,6 @@ const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
       />
-      {hoveredProcess && mousePosition && !onHover && (
-        <div
-          style={{
-            position: 'fixed',
-            top: mousePosition.y + 10,
-            left: mousePosition.x + 10,
-            backgroundColor: 'rgba(0, 0, 0, 0.8)',
-            color: 'white',
-            padding: '8px',
-            borderRadius: '4px',
-            maxWidth: '400px',
-            zIndex: 1000,
-            pointerEvents: 'none',
-          }}
-        >
-          <Typography variant="body2" sx={{ wordBreak: 'break-word' }}>
-            Command: {hoveredProcess.fullCommand}
-          </Typography>
-          <Typography variant="body2">PID: {hoveredProcess.pid}</Typography>
-          <Typography variant="body2">
-            Duration:{' '}
-            {Math.round(hoveredProcess.endTime - hoveredProcess.startTime)} sec
-          </Typography>
-        </div>
-      )}
     </Box>
   );
 };
