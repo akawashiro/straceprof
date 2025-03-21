@@ -140,3 +140,43 @@ export function calculateThresholdToShowProcess(processes: Process[]): number {
   // Return the threshold (rounded to nearest integer for better UX)
   return Math.ceil(thresholdDuration);
 }
+
+/**
+ * Calculate vCPU allocation for processes
+ * @param processes Array of Process objects
+ * @param thresholdToShowProcess Minimum duration threshold in seconds
+ * @returns Array of vCPU assignments for each process
+ */
+export function calculateProcessVcpuAllocation(
+  processes: Process[],
+  thresholdToShowProcess: number
+): number[] {
+  // Filter processes based on thresholdToShowProcess
+  const filteredProcesses = processes
+    .filter((p) => p.endTime - p.startTime >= thresholdToShowProcess)
+    .sort((a, b) => a.startTime - b.startTime);
+
+  // Calculate process layout (which vCPU each process runs on)
+  const vcpuUsedTimes: number[] = [];
+  const processToVcpu: number[] = [];
+
+  for (const process of filteredProcesses) {
+    let assigned = false;
+
+    for (let j = 0; j < vcpuUsedTimes.length; j++) {
+      if (vcpuUsedTimes[j] <= process.startTime) {
+        vcpuUsedTimes[j] = process.endTime;
+        processToVcpu.push(j);
+        assigned = true;
+        break;
+      }
+    }
+
+    if (!assigned) {
+      vcpuUsedTimes.push(process.endTime);
+      processToVcpu.push(vcpuUsedTimes.length - 1);
+    }
+  }
+
+  return processToVcpu;
+}
