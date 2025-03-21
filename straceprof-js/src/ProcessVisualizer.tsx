@@ -1,5 +1,9 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { Process, calculateThresholdToShowProcess } from './ProcessUtils';
+import {
+  Process,
+  calculateThresholdToShowProcess,
+  calculateProcessVcpuAllocation,
+} from './ProcessUtils';
 import { Box, Typography, Slider } from '@mui/material';
 import ProcessCanvas from './ProcessCanvas';
 
@@ -29,17 +33,33 @@ const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
     height: 800,
   });
 
-  // Set initial canvas width based on window size
+  // Set initial canvas dimensions based on window size and processes
   useEffect(() => {
     // Set initial width to 90% of window width, with min/max constraints
     const windowWidth = window.innerWidth;
     const initialWidth = Math.min(Math.max(windowWidth * 0.9, 400), 2000);
 
-    setDimensions((prev) => ({
-      ...prev,
+    // Use calculateProcessVcpuAllocation to determine how many vCPU rows we need
+    const processToVcpu = calculateProcessVcpuAllocation(
+      processes,
+      thresholdToShowProcess
+    );
+    const maxVcpu =
+      processToVcpu.length > 0 ? Math.max(...processToVcpu) + 1 : 0;
+
+    // Calculate height based on number of vCPUs (30px per row + 30px for title/axis)
+    // Use the constant PROCESS_ROW_HEIGHT from ProcessCanvas.tsx
+    const PROCESS_ROW_HEIGHT = 30;
+    const calculatedHeight = maxVcpu * PROCESS_ROW_HEIGHT + 30;
+
+    // Set minimum height of 200px
+    const initialHeight = Math.max(calculatedHeight, 200);
+
+    setDimensions({
       width: initialWidth,
-    }));
-  }, []); // Empty dependency array means this runs once on mount
+      height: initialHeight,
+    });
+  }, [processes, thresholdToShowProcess]); // Re-calculate when processes or threshold changes
 
   // State for hover functionality
   const [hoveredProcess, setHoveredProcess] = useState<Process | null>(null);
