@@ -1,4 +1,4 @@
-import React, { useRef, useState, useLayoutEffect } from 'react';
+import React, { useRef, useState } from 'react';
 import { Process } from './ProcessUtils';
 import { Box, Typography, Slider } from '@mui/material';
 import ProcessCanvas from './ProcessCanvas';
@@ -19,7 +19,7 @@ const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const [canvasDimensions, setDimensions] = useState({
     width: 1200,
-    height: 400,
+    height: 800,
   });
 
   // State for hover functionality
@@ -29,21 +29,20 @@ const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
     y: number;
   } | null>(null);
 
-  // Update dimensions when container size changes
-  useLayoutEffect(() => {
-    const handleResize = () => {
-      if (containerRef.current) {
-        // 50 is subtracted to account for padding
-        const width = containerRef.current.clientWidth - 50;
-        const height = containerRef.current.clientHeight - 50;
-        setDimensions({ width, height });
-      }
-    };
+  // Width and height sliders
+  const handleWidthChange = (_: Event, value: number | number[]) => {
+    setDimensions((prev) => ({
+      ...prev,
+      width: value as number,
+    }));
+  };
 
-    handleResize(); // Initial size
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  const handleHeightChange = (_: Event, value: number | number[]) => {
+    setDimensions((prev) => ({
+      ...prev,
+      height: value as number,
+    }));
+  };
 
   // Handle hover events from ProcessCanvas
   const handleHover = (
@@ -68,6 +67,36 @@ const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
             min={0}
             max={30}
             step={1}
+            valueLabelDisplay="auto"
+            sx={{ flex: 1 }}
+          />
+        </Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+          <Typography sx={{ mr: 2, minWidth: 180 }}>
+            Canvas Width (px):
+          </Typography>
+          <Slider
+            size="small"
+            value={canvasDimensions.width}
+            onChange={handleWidthChange}
+            min={400}
+            max={2000}
+            step={50}
+            valueLabelDisplay="auto"
+            sx={{ flex: 1 }}
+          />
+        </Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+          <Typography sx={{ mr: 2, minWidth: 180 }}>
+            Canvas Height (px):
+          </Typography>
+          <Slider
+            size="small"
+            value={canvasDimensions.height}
+            onChange={handleHeightChange}
+            min={200}
+            max={1200}
+            step={50}
             valueLabelDisplay="auto"
             sx={{ flex: 1 }}
           />
