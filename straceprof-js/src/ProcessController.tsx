@@ -56,43 +56,7 @@ const ProcessController: React.FC<ProcessControllerProps> = ({
           gap: 2,
           mb: 2,
         }}
-      >
-        <FormControl sx={{ minWidth: 200 }}>
-          <InputLabel id="example-select-label">Example Logs</InputLabel>
-          <Select
-            labelId="example-select-label"
-            value={selectedExample}
-            onChange={onExampleChange}
-            label="Example Log"
-            MenuProps={{
-              PaperProps: {
-                style: {
-                  maxHeight: 48 * 4.5,
-                },
-              },
-            }}
-          >
-            {Object.entries(exampleLogs).map(([key, { name }]) => (
-              <MenuItem key={key} value={key}>
-                {name}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-
-        <Typography>
-          Take a strace log using strace --trace=execve,execveat,exit,exit_group
-          --follow-forks --string-limit=1000 -ttt --output=straceprof.log
-          "command to profile" and upload log:{' '}
-        </Typography>
-        <Button
-          variant="contained"
-          startIcon={<UploadFileIcon />}
-          onClick={handleUploadClick}
-        >
-          Upload log
-        </Button>
-      </Box>
+      ></Box>
       <input
         type="file"
         ref={fileInputRef}
@@ -101,6 +65,50 @@ const ProcessController: React.FC<ProcessControllerProps> = ({
       />
 
       <Grid2 container spacing={2}>
+        <Grid2 size={9}>
+          <Typography>
+            Take a strace log using strace
+            --trace=execve,execveat,exit,exit_group --follow-forks
+            --string-limit=1000 -ttt --output=straceprof.log "command to
+            profile" and upload log:{' '}
+          </Typography>
+        </Grid2>
+        <Grid2 size={3}>
+          <Button
+            variant="contained"
+            startIcon={<UploadFileIcon />}
+            onClick={handleUploadClick}
+          >
+            Upload log
+          </Button>
+        </Grid2>
+        <Grid2 size={9}>
+          <Typography>Load a sample log</Typography>
+        </Grid2>
+        <Grid2 size={3}>
+          <FormControl sx={{ minWidth: 200 }}>
+            <InputLabel id="example-select-label">Example Log</InputLabel>
+            <Select
+              labelId="example-select-label"
+              value={selectedExample}
+              onChange={onExampleChange}
+              label="Example Log"
+              MenuProps={{
+                PaperProps: {
+                  style: {
+                    maxHeight: 48 * 4.5,
+                  },
+                },
+              }}
+            >
+              {Object.entries(exampleLogs).map(([key, { name }]) => (
+                <MenuItem key={key} value={key}>
+                  {name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Grid2>
         <Grid2 size={3}>
           <Typography align="right">
             Threshold to show processes (sec)
