@@ -101,6 +101,9 @@ function App() {
     setSelectedFile(file);
 
     if (file) {
+      // Set loading state to true when file is selected
+      setIsLoading(true);
+
       // Clear selected example when a file is uploaded
       setSelectedExample('');
 
@@ -123,8 +126,17 @@ function App() {
           updateCanvasDimensions(parsedProcesses, calculatedThreshold);
         } catch (error) {
           console.error('Error parsing strace log:', error);
+        } finally {
+          // Set loading state to false when processing is complete
+          setIsLoading(false);
         }
       };
+
+      reader.onerror = () => {
+        console.error('Error reading file');
+        setIsLoading(false);
+      };
+
       reader.readAsText(file);
     }
   };
