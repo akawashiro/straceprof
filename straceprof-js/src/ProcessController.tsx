@@ -19,6 +19,9 @@ import { exampleLogs } from './LogExamples';
 interface ProcessControllerProps {
   thresholdToShowProcess: number;
   onThresholdChange: (value: number) => void;
+  timeRange: [number, number];
+  globalTimeRange: [number, number];
+  onTimeRangeChange: (value: [number, number]) => void;
   selectedExample: string;
   onExampleChange: (event: SelectChangeEvent<string>) => void;
   onFileChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
@@ -36,6 +39,9 @@ const copyCommandToClipBoard = () => {
 const ProcessController: React.FC<ProcessControllerProps> = ({
   thresholdToShowProcess,
   onThresholdChange,
+  timeRange,
+  globalTimeRange,
+  onTimeRangeChange,
   selectedExample,
   onExampleChange,
   onFileChange,
@@ -45,6 +51,12 @@ const ProcessController: React.FC<ProcessControllerProps> = ({
   const handleUploadClick = () => {
     fileInputRef.current?.click();
   };
+
+  // Format time values for display (convert to seconds with 1 decimal place)
+  const formatTime = (value: number) => {
+    return `${value.toFixed(1)} sec`;
+  };
+
   return (
     <Container maxWidth="lg">
       <Box
@@ -124,6 +136,34 @@ const ProcessController: React.FC<ProcessControllerProps> = ({
               { value: 30, label: '30 sec' },
             ]}
             valueLabelDisplay="on"
+          />
+        </Grid2>
+        <Grid2 size={3}>
+          <Typography align="right">Time range to visualize (sec)</Typography>
+        </Grid2>
+        <Grid2 size={9}>
+          <Slider
+            size="small"
+            value={timeRange}
+            onChange={(_, value) =>
+              onTimeRangeChange(value as [number, number])
+            }
+            min={globalTimeRange[0]}
+            max={globalTimeRange[1]}
+            step={(globalTimeRange[1] - globalTimeRange[0]) / 100} // Dynamic step based on range
+            marks={[
+              {
+                value: globalTimeRange[0],
+                label: formatTime(globalTimeRange[0]),
+              },
+              {
+                value: globalTimeRange[1],
+                label: formatTime(globalTimeRange[1]),
+              },
+            ]}
+            valueLabelDisplay="on"
+            valueLabelFormat={formatTime}
+            disableSwap
           />
         </Grid2>
       </Grid2>

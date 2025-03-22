@@ -8,6 +8,7 @@ interface ProcessCanvasProps {
   height: number;
   title: string;
   thresholdToShowProcess: number;
+  timeRange: [number, number];
   colorMap: Record<string, string>;
   onHover?: (
     process: Process | null,
@@ -67,6 +68,7 @@ const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
   height,
   title,
   thresholdToShowProcess,
+  timeRange,
   colorMap,
   onHover,
 }) => {
@@ -142,16 +144,9 @@ const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
     // Reset process rectangles
     const newProcessRects: ProcessRect[] = [];
 
-    // Calculate time range
-    let offsetTime = Number.MAX_SAFE_INTEGER;
-    let maxTime = 0;
-
-    for (const process of filteredProcesses) {
-      offsetTime = Math.min(offsetTime, process.startTime);
-      maxTime = Math.max(maxTime, process.endTime);
-    }
-
-    const timeRange = maxTime - offsetTime;
+    // Use the provided time range instead of calculating it from processes
+    const [startTime, endTime] = timeRange;
+    const visibleTimeRange = endTime - startTime;
 
     // Calculate process layout (which vCPU each process runs on)
     const processToVcpu = calculateProcessVcpuAllocation(
@@ -169,8 +164,6 @@ const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
       canvas.height = requiredHeight;
     }
 
-    // Use the provided color map from props
-
     // Calculate effective drawing area with padding
     const effectiveWidth = canvas.width - CANVAS_PADDING * 2;
     const effectiveHeight = canvas.height - CANVAS_PADDING * 2;
@@ -185,10 +178,17 @@ const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
     ctx.fillStyle = '#000000';
     ctx.font = `10px ${theme.typography.fontFamily}`;
 
-    const xTickInterval = Math.max(Math.floor(timeRange / 10), 1);
-    for (let t = 0; t <= timeRange; t += xTickInterval) {
-      const x = (t / timeRange) * effectiveWidth + CANVAS_PADDING;
-      ctx.fillText(`${t}s`, x, 45 + CANVAS_PADDING); // Position at top below title
+    // Calculate tick interval based on visible time range
+    const xTickInterval = Math.max(Math.floor(visibleTimeRange / 10), 1);
+
+    // Draw time axis ticks and grid lines
+    for (let t = 0; t <= visibleTimeRange; t += xTickInterval) {
+      const currentTime = startTime + t;
+      const x = (t / visibleTimeRange) * effectiveWidth + CANVAS_PADDING;
+
+      // Format time label (seconds from start time)
+      const timeLabel = `${t.toFixed(1)}s`;
+      ctx.fillText(timeLabel, x, 45 + CANVAS_PADDING); // Position at top below title
 
       // Draw light grid line
       ctx.strokeStyle = '#EEEEEE';
@@ -203,12 +203,19 @@ const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
       const process = filteredProcesses[i];
       const vcpu = processToVcpu[i];
 
+      // Calculate visible portion of the process within the time range
+      const visibleStartTime = Math.max(process.startTime, startTime);
+      const visibleEndTime = Math.min(process.endTime, endTime);
+
+      // Skip if process is completely outside the visible time range
+      if (visibleEndTime <= visibleStartTime) continue;
+
       // Calculate rectangle dimensions with padding
       const startX =
-        ((process.startTime - offsetTime) / timeRange) * effectiveWidth +
+        ((visibleStartTime - startTime) / visibleTimeRange) * effectiveWidth +
         CANVAS_PADDING;
       const endX =
-        ((process.endTime - offsetTime) / timeRange) * effectiveWidth +
+        ((visibleEndTime - startTime) / visibleTimeRange) * effectiveWidth +
         CANVAS_PADDING;
       const rectWidth = endX - startX;
 
@@ -253,6 +260,7 @@ const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
     width,
     height,
     thresholdToShowProcess,
+    timeRange,
     title,
     colorMap,
   ]);

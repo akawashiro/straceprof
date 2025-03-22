@@ -7,6 +7,7 @@ interface ProcessVisualizerProps {
   processes: Process[];
   title?: string;
   thresholdToShowProcess: number;
+  timeRange: [number, number];
   canvasWidth: number;
   canvasHeight: number;
   onHoverProcess: (
@@ -24,6 +25,7 @@ const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
   processes,
   title = 'Process Visualization',
   thresholdToShowProcess,
+  timeRange,
   canvasWidth,
   canvasHeight,
   onHoverProcess,
@@ -37,7 +39,8 @@ const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
     <Container maxWidth={false} sx={{ px: 3 }}>
       {processes.length === 0 ? (
         <Typography variant="body1">
-          No processes to display. Try reducing the minimum duration.
+          No processes to display. Try reducing the minimum duration or
+          adjusting the time range.
         </Typography>
       ) : (
         <Box sx={{ width: '100%' }}>
@@ -47,6 +50,7 @@ const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
             height={canvasHeight}
             title={title}
             thresholdToShowProcess={thresholdToShowProcess}
+            timeRange={timeRange}
             onHover={onHoverProcess}
             colorMap={colorMap}
           />

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Box, Typography, CircularProgress, Container } from '@mui/material';
 import {
   Process,
@@ -22,6 +22,7 @@ function App() {
   // Canvas control state
   const [thresholdToShowProcess, setThresholdToShowProcess] =
     useState<number>(0);
+  const [timeRange, setTimeRange] = useState<[number, number]>([0, 0]);
   const [canvasDimensions, setCanvasDimensions] = useState({
     width: window.innerWidth * 0.9, // Initial width based on window size
     height: 800, // Initial height, will be auto-adjusted based on processes
@@ -33,6 +34,16 @@ function App() {
     x: number;
     y: number;
   } | null>(null);
+
+  // Calculate global time range from all processes
+  const globalTimeRange = useMemo(() => {
+    if (processes.length === 0) return [0, 0] as [number, number];
+
+    const minTime = Math.min(...processes.map((p) => p.startTime));
+    const maxTime = Math.max(...processes.map((p) => p.endTime));
+
+    return [minTime, maxTime] as [number, number];
+  }, [processes]);
 
   // Fetch and parse logs when selected example changes
   useEffect(() => {
@@ -60,6 +71,13 @@ function App() {
         const calculatedThreshold =
           calculateThresholdToShowProcess(parsedProcesses);
         setThresholdToShowProcess(calculatedThreshold);
+
+        // Calculate and set the initial time range
+        if (parsedProcesses.length > 0) {
+          const minTime = Math.min(...parsedProcesses.map((p) => p.startTime));
+          const maxTime = Math.max(...parsedProcesses.map((p) => p.endTime));
+          setTimeRange([minTime, maxTime]);
+        }
 
         // Set initial canvas dimensions based on window size and processes
         updateCanvasDimensions(parsedProcesses, calculatedThreshold);
@@ -140,6 +158,15 @@ function App() {
             calculateThresholdToShowProcess(parsedProcesses);
           setThresholdToShowProcess(calculatedThreshold);
 
+          // Calculate and set the initial time range
+          if (parsedProcesses.length > 0) {
+            const minTime = Math.min(
+              ...parsedProcesses.map((p) => p.startTime)
+            );
+            const maxTime = Math.max(...parsedProcesses.map((p) => p.endTime));
+            setTimeRange([minTime, maxTime]);
+          }
+
           // Set initial canvas dimensions
           updateCanvasDimensions(parsedProcesses, calculatedThreshold);
         } catch (error) {
@@ -165,6 +192,11 @@ function App() {
     updateCanvasDimensions(processes, value);
   };
 
+  // Handle time range changes
+  const handleTimeRangeChange = (value: [number, number]) => {
+    setTimeRange(value);
+  };
+
   // Handle hover events from ProcessCanvas
   const handleHover = (
     process: Process | null,
@@ -173,6 +205,16 @@ function App() {
     setHoveredProcess(process);
     setMousePosition(position);
   };
+
+  // Filter processes based on both threshold and time range
+  const filteredProcesses = useMemo(() => {
+    return processes.filter(
+      (p) =>
+        p.endTime - p.startTime >= thresholdToShowProcess &&
+        p.startTime <= timeRange[1] &&
+        p.endTime >= timeRange[0]
+    );
+  }, [processes, thresholdToShowProcess, timeRange]);
 
   return (
     <Box sx={{ width: '100%', height: '100%', textAlign: 'center' }}>
@@ -210,6 +252,9 @@ function App() {
             <ProcessController
               thresholdToShowProcess={thresholdToShowProcess}
               onThresholdChange={handleThresholdChange}
+              timeRange={timeRange}
+              globalTimeRange={globalTimeRange}
+              onTimeRangeChange={handleTimeRangeChange}
               selectedExample={selectedExample}
               onExampleChange={(event) => {
                 setSelectedExample(event.target.value);
@@ -220,7 +265,7 @@ function App() {
             />
           </Box>
           <ProcessVisualizer
-            processes={processes}
+            processes={filteredProcesses}
             title={
               selectedFile
                 ? selectedFile.name
@@ -229,6 +274,7 @@ function App() {
                   : 'Sample Log Visualization'
             }
             thresholdToShowProcess={thresholdToShowProcess}
+            timeRange={timeRange}
             canvasWidth={canvasDimensions.width}
             canvasHeight={canvasDimensions.height}
             onHoverProcess={handleHover}
