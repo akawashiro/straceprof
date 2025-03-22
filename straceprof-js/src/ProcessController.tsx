@@ -150,7 +150,6 @@ const ProcessController: React.FC<ProcessControllerProps> = ({
             }
             min={globalTimeRange[0]}
             max={globalTimeRange[1]}
-            step={(globalTimeRange[1] - globalTimeRange[0]) / 100} // Dynamic step based on range
             marks={[
               {
                 value: globalTimeRange[0],
