@@ -169,7 +169,9 @@ const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
 
     // Draw title
     ctx.font = '16px Arial';
-    ctx.fillText(title, 10, 20);
+    ctx.textAlign = 'center';
+    ctx.fillText(title, canvas.width / 2, 20);
+    ctx.textAlign = 'left'; // Reset text alignment for other text elements
 
     // Draw time axis
     ctx.fillStyle = '#000000';
