@@ -186,7 +186,6 @@ const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
 
     // Draw time axis ticks and grid lines
     for (let t = 0; t <= visibleTimeRange; t += xTickInterval) {
-      const currentTime = startTime + t;
       const x = (t / visibleTimeRange) * effectiveWidth + CANVAS_PADDING;
 
       // Format time label (seconds from start time)
@@ -269,6 +268,7 @@ const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
     timeRange,
     title,
     colorMap,
+    theme.typography.fontFamily,
   ]);
 
   return (
