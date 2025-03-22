@@ -176,7 +176,7 @@ const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
     const effectiveHeight = canvas.height - CANVAS_PADDING * 2;
 
     // Draw title
-    ctx.font = `16px ${theme.typography.fontFamily}`;
+    ctx.font = `20px ${theme.typography.fontFamily}`;
     ctx.textAlign = 'center';
     ctx.fillText(title, canvas.width / 2, 20 + CANVAS_PADDING);
     ctx.textAlign = 'left'; // Reset text alignment for other text elements
@@ -188,7 +188,7 @@ const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
     const xTickInterval = Math.max(Math.floor(timeRange / 10), 1);
     for (let t = 0; t <= timeRange; t += xTickInterval) {
       const x = (t / timeRange) * effectiveWidth + CANVAS_PADDING;
-      ctx.fillText(`${t}s`, x, 35 + CANVAS_PADDING); // Position at top below title
+      ctx.fillText(`${t}s`, x, 45 + CANVAS_PADDING); // Position at top below title
 
       // Draw light grid line
       ctx.strokeStyle = '#EEEEEE';
@@ -212,7 +212,7 @@ const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
         CANVAS_PADDING;
       const rectWidth = endX - startX;
 
-      const startY = vcpu * PROCESS_ROW_HEIGHT + 50 + CANVAS_PADDING; // Adjusted to account for time axis at top
+      const startY = vcpu * PROCESS_ROW_HEIGHT + 60 + CANVAS_PADDING; // Adjusted to account for time axis at top
       const rectHeight = PROCESS_ROW_HEIGHT - 2; // -2 for spacing between rows
 
       // Store rectangle information for hover detection

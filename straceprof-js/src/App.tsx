@@ -102,8 +102,8 @@ function App() {
       processToVcpu.length > 0 ? Math.max(...processToVcpu) + 1 : 0;
 
     // Calculate height based on number of vCPUs (30px per row + 30px for title/axis)
-    const PROCESS_ROW_HEIGHT = 30;
-    const calculatedHeight = maxVcpu * PROCESS_ROW_HEIGHT + 30;
+    const PROCESS_ROW_HEIGHT = 32;
+    const calculatedHeight = maxVcpu * PROCESS_ROW_HEIGHT + 50;
 
     // Set minimum height of 200px
     const initialHeight = Math.max(calculatedHeight, 200);
