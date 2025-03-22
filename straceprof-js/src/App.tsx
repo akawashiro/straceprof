@@ -1,28 +1,22 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
-  Button,
   Box,
   Typography,
   Divider,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  SelectChangeEvent,
   CircularProgress,
+  Container,
 } from '@mui/material';
-import UploadFileIcon from '@mui/icons-material/UploadFile';
-import { Process, getProcessesFromLog } from './ProcessUtils';
+import {
+  Process,
+  getProcessesFromLog,
+  calculateThresholdToShowProcess,
+  calculateProcessVcpuAllocation,
+} from './ProcessUtils';
 import ProcessVisualizer from './ProcessVisualizer';
+import ProcessController from './ProcessController';
+import { exampleLogs } from './LogExamples';
 import NoProcessesFound from './NoProcessesFound';
 import { fetchLog } from './LogUtils';
-import './App.css';
-
-// Mapping of example names to their display names and log file paths
-const exampleLogs: Record<string, { name: string; path: string }> = {
-  npm_install: { name: 'NPM Install', path: 'npm_install.log' },
-  linux_build: { name: 'Linux Build', path: 'linux_build.log' },
-};
 
 function App() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -31,7 +25,20 @@ function App() {
   const [selectedExample, setSelectedExample] = useState<string>('npm_install');
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  // Canvas control state
+  const [thresholdToShowProcess, setThresholdToShowProcess] =
+    useState<number>(0);
+  const [canvasDimensions, setCanvasDimensions] = useState({
+    width: 1200,
+    height: 800,
+  });
+
+  // State for hover functionality
+  const [hoveredProcess, setHoveredProcess] = useState<Process | null>(null);
+  const [mousePosition, setMousePosition] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
 
   // Fetch and parse logs when selected example changes
   useEffect(() => {
@@ -54,6 +61,14 @@ function App() {
         setFileContent(logContent);
         const parsedProcesses = getProcessesFromLog(logContent);
         setProcesses(parsedProcesses);
+
+        // Calculate and set the initial threshold
+        const calculatedThreshold =
+          calculateThresholdToShowProcess(parsedProcesses);
+        setThresholdToShowProcess(calculatedThreshold);
+
+        // Set initial canvas dimensions based on window size and processes
+        updateCanvasDimensions(parsedProcesses, calculatedThreshold);
       })
       .catch((error) => {
         console.error('Error fetching example log:', error);
@@ -62,6 +77,30 @@ function App() {
         setIsLoading(false);
       });
   }, [selectedExample, selectedFile]);
+
+  // Update canvas dimensions based on processes and threshold
+  const updateCanvasDimensions = (procs: Process[], threshold: number) => {
+    // Set initial width to 90% of window width, with min/max constraints
+    const windowWidth = window.innerWidth;
+    const initialWidth = Math.min(Math.max(windowWidth * 0.9, 400), 2000);
+
+    // Use calculateProcessVcpuAllocation to determine how many vCPU rows we need
+    const processToVcpu = calculateProcessVcpuAllocation(procs, threshold);
+    const maxVcpu =
+      processToVcpu.length > 0 ? Math.max(...processToVcpu) + 1 : 0;
+
+    // Calculate height based on number of vCPUs (30px per row + 30px for title/axis)
+    const PROCESS_ROW_HEIGHT = 30;
+    const calculatedHeight = maxVcpu * PROCESS_ROW_HEIGHT + 30;
+
+    // Set minimum height of 200px
+    const initialHeight = Math.max(calculatedHeight, 200);
+
+    setCanvasDimensions({
+      width: initialWidth,
+      height: initialHeight,
+    });
+  };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] || null;
@@ -80,6 +119,14 @@ function App() {
         try {
           const parsedProcesses = getProcessesFromLog(content);
           setProcesses(parsedProcesses);
+
+          // Calculate and set the initial threshold
+          const calculatedThreshold =
+            calculateThresholdToShowProcess(parsedProcesses);
+          setThresholdToShowProcess(calculatedThreshold);
+
+          // Set initial canvas dimensions
+          updateCanvasDimensions(parsedProcesses, calculatedThreshold);
         } catch (error) {
           console.error('Error parsing strace log:', error);
         }
@@ -88,70 +135,37 @@ function App() {
     }
   };
 
-  const handleExampleChange = (event: SelectChangeEvent<string>) => {
-    setSelectedExample(event.target.value);
-    // Clear selected file when an example is selected
-    setSelectedFile(null);
+  // Handle process controller changes
+  const handleThresholdChange = (value: number) => {
+    setThresholdToShowProcess(value);
+    updateCanvasDimensions(processes, value);
   };
 
-  const handleUploadClick = () => {
-    fileInputRef.current?.click();
+  const handleWidthChange = (value: number) => {
+    setCanvasDimensions((prev) => ({
+      ...prev,
+      width: value,
+    }));
+  };
+
+  const handleHeightChange = (value: number) => {
+    setCanvasDimensions((prev) => ({
+      ...prev,
+      height: value,
+    }));
+  };
+
+  // Handle hover events from ProcessCanvas
+  const handleHover = (
+    process: Process | null,
+    position: { x: number; y: number } | null
+  ) => {
+    setHoveredProcess(process);
+    setMousePosition(position);
   };
 
   return (
     <Box sx={{ width: '100%', height: '100%', textAlign: 'center' }}>
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          gap: 2,
-          mb: 2,
-        }}
-      >
-        <FormControl sx={{ minWidth: 200 }}>
-          <InputLabel id="example-select-label">Example Logs</InputLabel>
-          <Select
-            labelId="example-select-label"
-            value={selectedExample}
-            onChange={handleExampleChange}
-            label="Example Log"
-            MenuProps={{
-              PaperProps: {
-                style: {
-                  maxHeight: 48 * 4.5,
-                },
-              },
-            }}
-          >
-            {Object.entries(exampleLogs).map(([key, { name }]) => (
-              <MenuItem key={key} value={key}>
-                {name}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-
-        <Typography>
-          Take a strace log using strace --trace=execve,execveat,exit,exit_group
-          --follow-forks --string-limit=1000 -ttt --output=straceprof.log
-          "command to profile" and upload log:{' '}
-        </Typography>
-        <Button
-          variant="contained"
-          startIcon={<UploadFileIcon />}
-          onClick={handleUploadClick}
-        >
-          Upload log
-        </Button>
-      </Box>
-      <input
-        type="file"
-        ref={fileInputRef}
-        onChange={handleFileChange}
-        style={{ display: 'none' }}
-      />
-
       {selectedFile && (
         <Box sx={{ mt: 3, textAlign: 'left' }}>
           <Typography variant="h6" gutterBottom>
@@ -179,16 +193,55 @@ function App() {
       )}
 
       {!isLoading && processes.length > 0 && (
-        <ProcessVisualizer
-          processes={processes}
-          title={
-            selectedFile
-              ? selectedFile.name
-              : selectedExample
-                ? `${exampleLogs[selectedExample].name} Visualization`
-                : 'Sample Log Visualization'
-          }
-        />
+        <>
+          <Container maxWidth={'lg'}>
+            <Typography variant={'h1'}>straceprof</Typography>
+            <Typography>
+              straceprof is a profiler designed for multi-process programs.
+              straceprof can take profile of any process when you can run it
+              under strace. It is particularly well-suited for profiling build
+              processes such as those initiated by make, cmake, shell scripts,
+              or docker build. Upload the result of strace
+              --trace=execve,execveat,exit,exit_group --follow-forks
+              --string-limit=1000 -ttt --output=straceprof.log &lt;comamnd to
+              profile&gt; and visualize it.
+            </Typography>
+          </Container>
+
+          <Box sx={{ mt: 4, mb: 2 }}>
+            <ProcessController
+              thresholdToShowProcess={thresholdToShowProcess}
+              canvasWidth={canvasDimensions.width}
+              canvasHeight={canvasDimensions.height}
+              onThresholdChange={handleThresholdChange}
+              onWidthChange={handleWidthChange}
+              onHeightChange={handleHeightChange}
+              selectedExample={selectedExample}
+              onExampleChange={(event) => {
+                setSelectedExample(event.target.value);
+                // Clear selected file when an example is selected
+                setSelectedFile(null);
+              }}
+              onFileChange={handleFileChange}
+            />
+          </Box>
+          <ProcessVisualizer
+            processes={processes}
+            title={
+              selectedFile
+                ? selectedFile.name
+                : selectedExample
+                  ? `${exampleLogs[selectedExample].name} Visualization`
+                  : 'Sample Log Visualization'
+            }
+            thresholdToShowProcess={thresholdToShowProcess}
+            canvasWidth={canvasDimensions.width}
+            canvasHeight={canvasDimensions.height}
+            onHoverProcess={handleHover}
+            hoveredProcess={hoveredProcess}
+            mousePosition={mousePosition}
+          />
+        </>
       )}
     </Box>
   );
