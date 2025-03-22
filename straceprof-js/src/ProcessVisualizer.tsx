@@ -1,9 +1,5 @@
-import React, { useRef, useEffect, useMemo } from 'react';
-import {
-  Process,
-  calculateProcessVcpuAllocation,
-  generateColorMap,
-} from './ProcessUtils';
+import React, { useRef, useMemo } from 'react';
+import { Process, generateColorMap } from './ProcessUtils';
 import { Box, Typography } from '@mui/material';
 import ProcessCanvas from './ProcessCanvas';
 

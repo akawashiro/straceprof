@@ -1,17 +1,5 @@
-import { useState, useRef, useEffect } from 'react';
-import {
-  Button,
-  Box,
-  Typography,
-  Divider,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  SelectChangeEvent,
-  CircularProgress,
-} from '@mui/material';
-import UploadFileIcon from '@mui/icons-material/UploadFile';
+import { useState, useEffect } from 'react';
+import { Box, Typography, Divider, CircularProgress } from '@mui/material';
 import {
   Process,
   getProcessesFromLog,
@@ -19,15 +7,9 @@ import {
   calculateProcessVcpuAllocation,
 } from './ProcessUtils';
 import ProcessVisualizer from './ProcessVisualizer';
-import ProcessController from './ProcessController';
+import ProcessController, { exampleLogs } from './ProcessController';
 import NoProcessesFound from './NoProcessesFound';
 import { fetchLog } from './LogUtils';
-
-// Mapping of example names to their display names and log file paths
-const exampleLogs: Record<string, { name: string; path: string }> = {
-  npm_install: { name: 'NPM Install', path: 'npm_install.log' },
-  linux_build: { name: 'Linux Build', path: 'linux_build.log' },
-};
 
 function App() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -50,8 +32,6 @@ function App() {
     x: number;
     y: number;
   } | null>(null);
-
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Fetch and parse logs when selected example changes
   useEffect(() => {
@@ -177,70 +157,8 @@ function App() {
     setMousePosition(position);
   };
 
-  const handleExampleChange = (event: SelectChangeEvent<string>) => {
-    setSelectedExample(event.target.value);
-    // Clear selected file when an example is selected
-    setSelectedFile(null);
-  };
-
-  const handleUploadClick = () => {
-    fileInputRef.current?.click();
-  };
-
   return (
     <Box sx={{ width: '100%', height: '100%', textAlign: 'center' }}>
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          gap: 2,
-          mb: 2,
-        }}
-      >
-        <FormControl sx={{ minWidth: 200 }}>
-          <InputLabel id="example-select-label">Example Logs</InputLabel>
-          <Select
-            labelId="example-select-label"
-            value={selectedExample}
-            onChange={handleExampleChange}
-            label="Example Log"
-            MenuProps={{
-              PaperProps: {
-                style: {
-                  maxHeight: 48 * 4.5,
-                },
-              },
-            }}
-          >
-            {Object.entries(exampleLogs).map(([key, { name }]) => (
-              <MenuItem key={key} value={key}>
-                {name}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-
-        <Typography>
-          Take a strace log using strace --trace=execve,execveat,exit,exit_group
-          --follow-forks --string-limit=1000 -ttt --output=straceprof.log
-          "command to profile" and upload log:{' '}
-        </Typography>
-        <Button
-          variant="contained"
-          startIcon={<UploadFileIcon />}
-          onClick={handleUploadClick}
-        >
-          Upload log
-        </Button>
-      </Box>
-      <input
-        type="file"
-        ref={fileInputRef}
-        onChange={handleFileChange}
-        style={{ display: 'none' }}
-      />
-
       {selectedFile && (
         <Box sx={{ mt: 3, textAlign: 'left' }}>
           <Typography variant="h6" gutterBottom>
@@ -277,6 +195,13 @@ function App() {
               onThresholdChange={handleThresholdChange}
               onWidthChange={handleWidthChange}
               onHeightChange={handleHeightChange}
+              selectedExample={selectedExample}
+              onExampleChange={(event) => {
+                setSelectedExample(event.target.value);
+                // Clear selected file when an example is selected
+                setSelectedFile(null);
+              }}
+              onFileChange={handleFileChange}
             />
           </Box>
           <ProcessVisualizer
