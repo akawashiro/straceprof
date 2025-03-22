@@ -16,7 +16,6 @@ import { Process, getProcessesFromLog } from './ProcessUtils';
 import ProcessVisualizer from './ProcessVisualizer';
 import NoProcessesFound from './NoProcessesFound';
 import { fetchLog } from './LogUtils';
-import './App.css';
 
 // Mapping of example names to their display names and log file paths
 const exampleLogs: Record<string, { name: string; path: string }> = {
