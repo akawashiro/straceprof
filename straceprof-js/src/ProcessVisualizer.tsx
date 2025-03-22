@@ -70,14 +70,14 @@ const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
   } | null>(null);
 
   // Width and height sliders
-  const handleWidthChange = (_: Event, value: number | number[]) => {
+  const handleWidthChange = (value: number | number[]) => {
     setDimensions((prev) => ({
       ...prev,
       width: value as number,
     }));
   };
 
-  const handleHeightChange = (_: Event, value: number | number[]) => {
+  const handleHeightChange = (value: number | number[]) => {
     setDimensions((prev) => ({
       ...prev,
       height: value as number,
