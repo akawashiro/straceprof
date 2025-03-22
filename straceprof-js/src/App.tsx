@@ -7,7 +7,8 @@ import {
   calculateProcessVcpuAllocation,
 } from './ProcessUtils';
 import ProcessVisualizer from './ProcessVisualizer';
-import ProcessController, { exampleLogs } from './ProcessController';
+import ProcessController from './ProcessController';
+import { exampleLogs } from './LogExamples';
 import NoProcessesFound from './NoProcessesFound';
 import { fetchLog } from './LogUtils';
 
