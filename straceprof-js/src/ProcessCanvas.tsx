@@ -144,7 +144,10 @@ const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
     // Reset process rectangles
     const newProcessRects: ProcessRect[] = [];
 
-    // Use the provided time range instead of calculating it from processes
+    // Get the minimum start time to calculate relative times
+    const processMinTime = Math.min(...processes.map((p) => p.startTime));
+
+    // Use the provided time range (which is now relative to the start of the trace)
     const [startTime, endTime] = timeRange;
     const visibleTimeRange = endTime - startTime;
 
@@ -203,9 +206,12 @@ const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
       const process = filteredProcesses[i];
       const vcpu = processToVcpu[i];
 
-      // Calculate visible portion of the process within the time range
-      const visibleStartTime = Math.max(process.startTime, startTime);
-      const visibleEndTime = Math.min(process.endTime, endTime);
+      // Calculate visible portion of the process within the time range using relative time
+      const relativeStartTime = process.startTime - processMinTime;
+      const relativeEndTime = process.endTime - processMinTime;
+
+      const visibleStartTime = Math.max(relativeStartTime, startTime);
+      const visibleEndTime = Math.min(relativeEndTime, endTime);
 
       // Skip if process is completely outside the visible time range
       if (visibleEndTime <= visibleStartTime) continue;

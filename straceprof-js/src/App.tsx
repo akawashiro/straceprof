@@ -42,7 +42,8 @@ function App() {
     const minTime = Math.min(...processes.map((p) => p.startTime));
     const maxTime = Math.max(...processes.map((p) => p.endTime));
 
-    return [minTime, maxTime] as [number, number];
+    // Use relative time: [0, maxTime - minTime] instead of [minTime, maxTime]
+    return [0, maxTime - minTime] as [number, number];
   }, [processes]);
 
   // Fetch and parse logs when selected example changes
@@ -76,7 +77,8 @@ function App() {
         if (parsedProcesses.length > 0) {
           const minTime = Math.min(...parsedProcesses.map((p) => p.startTime));
           const maxTime = Math.max(...parsedProcesses.map((p) => p.endTime));
-          setTimeRange([minTime, maxTime]);
+          // Use relative time range
+          setTimeRange([0, maxTime - minTime]);
         }
 
         // Set initial canvas dimensions based on window size and processes
@@ -164,7 +166,8 @@ function App() {
               ...parsedProcesses.map((p) => p.startTime)
             );
             const maxTime = Math.max(...parsedProcesses.map((p) => p.endTime));
-            setTimeRange([minTime, maxTime]);
+            // Use relative time range
+            setTimeRange([0, maxTime - minTime]);
           }
 
           // Set initial canvas dimensions
@@ -208,11 +211,15 @@ function App() {
 
   // Filter processes based on both threshold and time range
   const filteredProcesses = useMemo(() => {
+    if (processes.length === 0) return [];
+
+    const minTime = Math.min(...processes.map((p) => p.startTime));
+
     return processes.filter(
       (p) =>
         p.endTime - p.startTime >= thresholdToShowProcess &&
-        p.startTime <= timeRange[1] &&
-        p.endTime >= timeRange[0]
+        p.startTime - minTime <= timeRange[1] &&
+        p.endTime - minTime >= timeRange[0]
     );
   }, [processes, thresholdToShowProcess, timeRange]);
 
