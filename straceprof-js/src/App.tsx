@@ -201,10 +201,14 @@ function App() {
               straceprof can take profile of any process when you can run it
               under strace. It is particularly well-suited for profiling build
               processes such as those initiated by make, cmake, shell scripts,
-              or docker build. Upload the result of strace
-              --trace=execve,execveat,exit,exit_group --follow-forks
-              --string-limit=1000 -ttt --output=straceprof.log &lt;comamnd to
-              profile&gt; and visualize it.
+              or docker build. Upload the result of{' '}
+              <code>
+                {' '}
+                strace --trace=execve,execveat,exit,exit_group --follow-forks
+                --string-limit=1000 -ttt --output=straceprof.log &lt;comamnd to
+                profile&gt;{' '}
+              </code>{' '}
+              and visualize it.
             </Typography>
           </Container>
 
