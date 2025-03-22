@@ -1,17 +1,24 @@
-import React, { useRef, useState, useEffect, useMemo } from 'react';
+import React, { useRef, useEffect, useMemo } from 'react';
 import {
   Process,
-  calculateThresholdToShowProcess,
   calculateProcessVcpuAllocation,
   generateColorMap,
 } from './ProcessUtils';
 import { Box, Typography } from '@mui/material';
 import ProcessCanvas from './ProcessCanvas';
-import ProcessCanvasController from './ProcessCanvasController';
 
 interface ProcessVisualizerProps {
   processes: Process[];
   title?: string;
+  thresholdToShowProcess: number;
+  canvasWidth: number;
+  canvasHeight: number;
+  onHoverProcess: (
+    process: Process | null,
+    position: { x: number; y: number } | null
+  ) => void;
+  hoveredProcess: Process | null;
+  mousePosition: { x: number; y: number } | null;
 }
 
 /**
@@ -20,96 +27,20 @@ interface ProcessVisualizerProps {
 const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
   processes,
   title = 'Process Visualization',
+  thresholdToShowProcess,
+  canvasWidth,
+  canvasHeight,
+  onHoverProcess,
+  hoveredProcess,
+  mousePosition,
 }) => {
-  const [thresholdToShowProcess, setthresholdToShowProcess] =
-    useState<number>(0);
-
-  // Calculate and set the initial threshold when processes change
-  useEffect(() => {
-    const calculatedThreshold = calculateThresholdToShowProcess(processes);
-    setthresholdToShowProcess(calculatedThreshold);
-  }, [processes]);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [canvasDimensions, setDimensions] = useState({
-    width: 1200,
-    height: 800,
-  });
-
-  // Set initial canvas dimensions based on window size and processes
-  useEffect(() => {
-    // Set initial width to 90% of window width, with min/max constraints
-    const windowWidth = window.innerWidth;
-    const initialWidth = Math.min(Math.max(windowWidth * 0.9, 400), 2000);
-
-    // Use calculateProcessVcpuAllocation to determine how many vCPU rows we need
-    const processToVcpu = calculateProcessVcpuAllocation(
-      processes,
-      thresholdToShowProcess
-    );
-    const maxVcpu =
-      processToVcpu.length > 0 ? Math.max(...processToVcpu) + 1 : 0;
-
-    // Calculate height based on number of vCPUs (30px per row + 30px for title/axis)
-    // Use the constant PROCESS_ROW_HEIGHT from ProcessCanvas.tsx
-    const PROCESS_ROW_HEIGHT = 30;
-    const calculatedHeight = maxVcpu * PROCESS_ROW_HEIGHT + 30;
-
-    // Set minimum height of 200px
-    const initialHeight = Math.max(calculatedHeight, 200);
-
-    setDimensions({
-      width: initialWidth,
-      height: initialHeight,
-    });
-  }, [processes, thresholdToShowProcess]); // Re-calculate when processes or threshold changes
 
   // Generate color map once when processes change
   const colorMap = useMemo(() => generateColorMap(processes), [processes]);
 
-  // State for hover functionality
-  const [hoveredProcess, setHoveredProcess] = useState<Process | null>(null);
-  const [mousePosition, setMousePosition] = useState<{
-    x: number;
-    y: number;
-  } | null>(null);
-
-  // Width and height sliders
-  const handleWidthChange = (value: number | number[]) => {
-    setDimensions((prev) => ({
-      ...prev,
-      width: value as number,
-    }));
-  };
-
-  const handleHeightChange = (value: number | number[]) => {
-    setDimensions((prev) => ({
-      ...prev,
-      height: value as number,
-    }));
-  };
-
-  // Handle hover events from ProcessCanvas
-  const handleHover = (
-    process: Process | null,
-    position: { x: number; y: number } | null
-  ) => {
-    setHoveredProcess(process);
-    setMousePosition(position);
-  };
-
   return (
     <Box>
-      <Box sx={{ mt: 4, mb: 2 }}>
-        <ProcessCanvasController
-          thresholdToShowProcess={thresholdToShowProcess}
-          canvasWidth={canvasDimensions.width}
-          canvasHeight={canvasDimensions.height}
-          onThresholdChange={(value) => setthresholdToShowProcess(value)}
-          onWidthChange={handleWidthChange}
-          onHeightChange={handleHeightChange}
-        />
-      </Box>
-
       {processes.length === 0 ? (
         <Typography variant="body1">
           No processes to display. Try reducing the minimum duration.
@@ -118,11 +49,11 @@ const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
         <Box sx={{ overflowX: 'auto' }} ref={containerRef}>
           <ProcessCanvas
             processes={processes}
-            width={canvasDimensions.width}
-            height={canvasDimensions.height}
+            width={canvasWidth}
+            height={canvasHeight}
             title={title}
             thresholdToShowProcess={thresholdToShowProcess}
-            onHover={handleHover}
+            onHover={onHoverProcess}
             colorMap={colorMap}
           />
           {hoveredProcess && mousePosition && (
