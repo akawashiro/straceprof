@@ -20,3 +20,6 @@ jobs:
       - name: Run tests
         working-directory: straceprof-js
         run: npm test
+      - name: Build
+        working-directory: straceprof-js
+        run: npm run build

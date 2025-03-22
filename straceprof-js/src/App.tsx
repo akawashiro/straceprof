@@ -30,7 +30,7 @@ function App() {
     useState<number>(0);
   const [canvasDimensions, setCanvasDimensions] = useState({
     width: 1200,
-    height: 800,
+    height: 800, // Initial height, will be auto-adjusted based on processes
   });
 
   // State for hover functionality
@@ -148,13 +148,6 @@ function App() {
     }));
   };
 
-  const handleHeightChange = (value: number) => {
-    setCanvasDimensions((prev) => ({
-      ...prev,
-      height: value,
-    }));
-  };
-
   // Handle hover events from ProcessCanvas
   const handleHover = (
     process: Process | null,
@@ -201,10 +194,14 @@ function App() {
               straceprof can take profile of any process when you can run it
               under strace. It is particularly well-suited for profiling build
               processes such as those initiated by make, cmake, shell scripts,
-              or docker build. Upload the result of strace
-              --trace=execve,execveat,exit,exit_group --follow-forks
-              --string-limit=1000 -ttt --output=straceprof.log &lt;comamnd to
-              profile&gt; and visualize it.
+              or docker build. Upload the result of{' '}
+              <code>
+                {' '}
+                strace --trace=execve,execveat,exit,exit_group --follow-forks
+                --string-limit=1000 -ttt --output=straceprof.log &lt;comamnd to
+                profile&gt;{' '}
+              </code>{' '}
+              and visualize it.
             </Typography>
           </Container>
 
@@ -212,10 +209,8 @@ function App() {
             <ProcessController
               thresholdToShowProcess={thresholdToShowProcess}
               canvasWidth={canvasDimensions.width}
-              canvasHeight={canvasDimensions.height}
               onThresholdChange={handleThresholdChange}
               onWidthChange={handleWidthChange}
-              onHeightChange={handleHeightChange}
               selectedExample={selectedExample}
               onExampleChange={(event) => {
                 setSelectedExample(event.target.value);
