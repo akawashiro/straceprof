@@ -1,5 +1,5 @@
 import React from 'react';
-import { Typography, Slider, Grid2, Box } from '@mui/material';
+import { Typography, Slider, Grid2, Container } from '@mui/material';
 
 interface ProcessCanvasControllerProps {
   thresholdToShowProcess: number;
@@ -22,7 +22,7 @@ const ProcessCanvasController: React.FC<ProcessCanvasControllerProps> = ({
   onHeightChange,
 }) => {
   return (
-    <Box>
+    <Container maxWidth="lg">
       <Grid2 container spacing={2}>
         <Grid2 size={3}>
           <Typography align="right">
@@ -37,7 +37,11 @@ const ProcessCanvasController: React.FC<ProcessCanvasControllerProps> = ({
             min={0}
             max={30}
             step={1}
-            valueLabelDisplay="auto"
+            marks={[
+              { value: 0, label: '0 sec' },
+              { value: 30, label: '30 sec' },
+            ]}
+            valueLabelDisplay="on"
           />
         </Grid2>
 
@@ -50,9 +54,13 @@ const ProcessCanvasController: React.FC<ProcessCanvasControllerProps> = ({
             value={canvasWidth}
             onChange={(_, value) => onWidthChange(value as number)}
             min={400}
-            max={2000}
+            max={10000}
             step={50}
-            valueLabelDisplay="auto"
+            marks={[
+              { value: 400, label: '400 px' },
+              { value: 10000, label: '10000 px' },
+            ]}
+            valueLabelDisplay="on"
           />
         </Grid2>
 
@@ -65,13 +73,17 @@ const ProcessCanvasController: React.FC<ProcessCanvasControllerProps> = ({
             value={canvasHeight}
             onChange={(_, value) => onHeightChange(value as number)}
             min={200}
-            max={1200}
+            max={10000}
             step={50}
-            valueLabelDisplay="auto"
+            marks={[
+              { value: 200, label: '200 px' },
+              { value: 10000, label: '10000 px' },
+            ]}
+            valueLabelDisplay="on"
           />
         </Grid2>
       </Grid2>
-    </Box>
+    </Container>
   );
 };
 
