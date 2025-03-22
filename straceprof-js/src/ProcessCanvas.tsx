@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Process, calculateProcessVcpuAllocation } from './ProcessUtils';
-import { Box } from '@mui/material';
+import { Box, useTheme } from '@mui/material';
 
 interface ProcessCanvasProps {
   processes: Process[];
@@ -68,6 +68,7 @@ const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
   onHover,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const theme = useTheme();
 
   // State for hover detection
   const [processRects, setProcessRects] = useState<ProcessRect[]>([]);
@@ -168,14 +169,14 @@ const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
     // Use the provided color map from props
 
     // Draw title
-    ctx.font = '16px Arial';
+    ctx.font = `16px ${theme.typography.fontFamily}`;
     ctx.textAlign = 'center';
     ctx.fillText(title, canvas.width / 2, 20);
     ctx.textAlign = 'left'; // Reset text alignment for other text elements
 
     // Draw time axis
     ctx.fillStyle = '#000000';
-    ctx.font = '10px Arial';
+    ctx.font = `10px ${theme.typography.fontFamily}`;
 
     const xTickInterval = Math.max(Math.floor(timeRange / 10), 1);
     for (let t = 0; t <= timeRange; t += xTickInterval) {
@@ -224,7 +225,7 @@ const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
       // Draw text if rectangle is wide enough
       if (rectWidth > 10) {
         ctx.fillStyle = '#000000';
-        ctx.font = '12px Arial';
+        ctx.font = `12px ${theme.typography.fontFamily}`;
 
         const text = generateText(process, rectWidth, 12);
         const textX = startX + rectWidth / 2;
