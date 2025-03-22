@@ -34,7 +34,7 @@ const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
   const colorMap = useMemo(() => generateColorMap(processes), [processes]);
 
   return (
-    <Container maxWidth={false}>
+    <Container maxWidth={false} sx={{ px: 3 }}>
       {processes.length === 0 ? (
         <Typography variant="body1">
           No processes to display. Try reducing the minimum duration.
