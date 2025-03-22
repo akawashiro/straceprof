@@ -216,7 +216,7 @@ function App() {
               selectedFile
                 ? selectedFile.name
                 : selectedExample
-                  ? `${exampleLogs[selectedExample].name} Visualization`
+                  ? `Example: ${exampleLogs[selectedExample].name}`
                   : 'Sample Log Visualization'
             }
             thresholdToShowProcess={thresholdToShowProcess}
