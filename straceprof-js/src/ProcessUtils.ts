@@ -1,4 +1,15 @@
-import { blue, cyan, deepOrange, deepPurple, green, indigo, pink, purple, red, teal } from '@mui/material/colors';
+import {
+  blue,
+  cyan,
+  deepOrange,
+  deepPurple,
+  green,
+  indigo,
+  pink,
+  purple,
+  red,
+  teal,
+} from '@mui/material/colors';
 
 /**
  * Maximum number of processes to display in the visualization
@@ -174,16 +185,16 @@ export function generateColorMap(processes: Process[]): Record<string, string> {
   // Assign colors to programs using MUI color palette
   // Using higher saturation values (700, 800) for better visibility
   const colorList = [
-    red[700],          // red
-    deepOrange[700],   // deep orange
-    purple[700],       // purple
-    deepPurple[700],   // deep purple
-    indigo[700],       // indigo
-    blue[700],         // blue
-    cyan[700],         // cyan
-    teal[700],         // teal
-    green[700],        // green
-    pink[700],         // pink
+    red[700], // red
+    deepOrange[700], // deep orange
+    purple[700], // purple
+    deepPurple[700], // deep purple
+    indigo[700], // indigo
+    blue[700], // blue
+    cyan[700], // cyan
+    teal[700], // teal
+    green[700], // green
+    pink[700], // pink
   ];
 
   const colorMap: Record<string, string> = {};

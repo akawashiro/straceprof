@@ -218,10 +218,6 @@ const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
       ctx.fillStyle = colorMap[programName] || '#CCCCCC';
       ctx.fillRect(startX, startY, rectWidth, rectHeight);
 
-      // Draw border
-      ctx.strokeStyle = '#000000';
-      ctx.strokeRect(startX, startY, rectWidth, rectHeight);
-
       // Draw text if rectangle is wide enough
       if (rectWidth > 10) {
         ctx.fillStyle = '#000000';
