@@ -19,10 +19,8 @@ import { exampleLogs } from './LogExamples';
 interface ProcessControllerProps {
   thresholdToShowProcess: number;
   canvasWidth: number;
-  canvasHeight: number;
   onThresholdChange: (value: number) => void;
   onWidthChange: (value: number) => void;
-  onHeightChange: (value: number) => void;
   selectedExample: string;
   onExampleChange: (event: SelectChangeEvent<string>) => void;
   onFileChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
@@ -40,10 +38,8 @@ const copyCommandToClipBoard = () => {
 const ProcessController: React.FC<ProcessControllerProps> = ({
   thresholdToShowProcess,
   canvasWidth,
-  canvasHeight,
   onThresholdChange,
   onWidthChange,
-  onHeightChange,
   selectedExample,
   onExampleChange,
   onFileChange,
@@ -148,25 +144,6 @@ const ProcessController: React.FC<ProcessControllerProps> = ({
             step={50}
             marks={[
               { value: 400, label: '400 px' },
-              { value: 10000, label: '10000 px' },
-            ]}
-            valueLabelDisplay="on"
-          />
-        </Grid2>
-
-        <Grid2 size={3}>
-          <Typography align="right">Canvas Height (px)</Typography>
-        </Grid2>
-        <Grid2 size={9}>
-          <Slider
-            size="small"
-            value={canvasHeight}
-            onChange={(_, value) => onHeightChange(value as number)}
-            min={200}
-            max={10000}
-            step={50}
-            marks={[
-              { value: 200, label: '200 px' },
               { value: 10000, label: '10000 px' },
             ]}
             valueLabelDisplay="on"
