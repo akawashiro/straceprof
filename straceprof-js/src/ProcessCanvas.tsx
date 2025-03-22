@@ -55,6 +55,9 @@ interface ProcessRect {
 // Fixed height for each process row, slightly larger than text size
 const PROCESS_ROW_HEIGHT = 30; // For 12px font
 
+// Padding inside the canvas (in pixels)
+const CANVAS_PADDING = 5;
+
 /**
  * ProcessCanvas component for rendering the process visualization canvas
  */
@@ -168,10 +171,14 @@ const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
 
     // Use the provided color map from props
 
+    // Calculate effective drawing area with padding
+    const effectiveWidth = canvas.width - CANVAS_PADDING * 2;
+    const effectiveHeight = canvas.height - CANVAS_PADDING * 2;
+
     // Draw title
     ctx.font = `16px ${theme.typography.fontFamily}`;
     ctx.textAlign = 'center';
-    ctx.fillText(title, canvas.width / 2, 20);
+    ctx.fillText(title, canvas.width / 2, 20 + CANVAS_PADDING);
     ctx.textAlign = 'left'; // Reset text alignment for other text elements
 
     // Draw time axis
@@ -180,14 +187,14 @@ const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
 
     const xTickInterval = Math.max(Math.floor(timeRange / 10), 1);
     for (let t = 0; t <= timeRange; t += xTickInterval) {
-      const x = (t / timeRange) * width;
-      ctx.fillText(`${t}s`, x, 35); // Position at top below title
+      const x = (t / timeRange) * effectiveWidth + CANVAS_PADDING;
+      ctx.fillText(`${t}s`, x, 35 + CANVAS_PADDING); // Position at top below title
 
       // Draw light grid line
       ctx.strokeStyle = '#EEEEEE';
       ctx.beginPath();
-      ctx.moveTo(x, 45); // Start below time labels
-      ctx.lineTo(x, height);
+      ctx.moveTo(x, 45 + CANVAS_PADDING); // Start below time labels
+      ctx.lineTo(x, effectiveHeight + CANVAS_PADDING);
       ctx.stroke();
     }
 
@@ -196,12 +203,16 @@ const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
       const process = filteredProcesses[i];
       const vcpu = processToVcpu[i];
 
-      // Calculate rectangle dimensions
-      const startX = ((process.startTime - offsetTime) / timeRange) * width;
-      const endX = ((process.endTime - offsetTime) / timeRange) * width;
+      // Calculate rectangle dimensions with padding
+      const startX =
+        ((process.startTime - offsetTime) / timeRange) * effectiveWidth +
+        CANVAS_PADDING;
+      const endX =
+        ((process.endTime - offsetTime) / timeRange) * effectiveWidth +
+        CANVAS_PADDING;
       const rectWidth = endX - startX;
 
-      const startY = vcpu * PROCESS_ROW_HEIGHT + 50; // Adjusted to account for time axis at top
+      const startY = vcpu * PROCESS_ROW_HEIGHT + 50 + CANVAS_PADDING; // Adjusted to account for time axis at top
       const rectHeight = PROCESS_ROW_HEIGHT - 2; // -2 for spacing between rows
 
       // Store rectangle information for hover detection
