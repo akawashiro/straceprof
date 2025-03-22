@@ -23,7 +23,7 @@ function App() {
   const [thresholdToShowProcess, setThresholdToShowProcess] =
     useState<number>(0);
   const [canvasDimensions, setCanvasDimensions] = useState({
-    width: 1200,
+    width: window.innerWidth * 0.9, // Initial width based on window size
     height: 800, // Initial height, will be auto-adjusted based on processes
   });
 
@@ -72,11 +72,29 @@ function App() {
       });
   }, [selectedExample, selectedFile]);
 
+  // Add window resize event listener
+  useEffect(() => {
+    const handleResize = () => {
+      setCanvasDimensions((prev) => ({
+        ...prev,
+        width: window.innerWidth * 0.9, // 90% of window width
+      }));
+    };
+
+    // Add event listener
+    window.addEventListener('resize', handleResize);
+
+    // Clean up
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
   // Update canvas dimensions based on processes and threshold
   const updateCanvasDimensions = (procs: Process[], threshold: number) => {
-    // Set initial width to 90% of window width, with min/max constraints
+    // Set width to 90% of window width, with min/max constraints
     const windowWidth = window.innerWidth;
-    const initialWidth = Math.min(Math.max(windowWidth * 0.9, 400), 2000);
+    const responsiveWidth = windowWidth * 0.9 + 1000;
 
     // Use calculateProcessVcpuAllocation to determine how many vCPU rows we need
     const processToVcpu = calculateProcessVcpuAllocation(procs, threshold);
@@ -91,7 +109,7 @@ function App() {
     const initialHeight = Math.max(calculatedHeight, 200);
 
     setCanvasDimensions({
-      width: initialWidth,
+      width: responsiveWidth,
       height: initialHeight,
     });
   };
@@ -147,13 +165,6 @@ function App() {
     updateCanvasDimensions(processes, value);
   };
 
-  const handleWidthChange = (value: number) => {
-    setCanvasDimensions((prev) => ({
-      ...prev,
-      width: value,
-    }));
-  };
-
   // Handle hover events from ProcessCanvas
   const handleHover = (
     process: Process | null,
@@ -198,9 +209,7 @@ function App() {
           <Box sx={{ mt: 4, mb: 2 }}>
             <ProcessController
               thresholdToShowProcess={thresholdToShowProcess}
-              canvasWidth={canvasDimensions.width}
               onThresholdChange={handleThresholdChange}
-              onWidthChange={handleWidthChange}
               selectedExample={selectedExample}
               onExampleChange={(event) => {
                 setSelectedExample(event.target.value);

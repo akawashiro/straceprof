@@ -258,7 +258,7 @@ const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
   ]);
 
   return (
-    <Box sx={{ position: 'relative' }}>
+    <Box sx={{ position: 'relative', width: '100%', overflowX: 'auto' }}>
       <canvas
         ref={canvasRef}
         style={{
@@ -266,6 +266,7 @@ const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
           borderRadius: '4px',
           maxWidth: '100%',
           height: 'auto',
+          display: 'block', // Prevents extra space below canvas
         }}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}

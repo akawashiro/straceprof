@@ -18,9 +18,7 @@ import { exampleLogs } from './LogExamples';
 
 interface ProcessControllerProps {
   thresholdToShowProcess: number;
-  canvasWidth: number;
   onThresholdChange: (value: number) => void;
-  onWidthChange: (value: number) => void;
   selectedExample: string;
   onExampleChange: (event: SelectChangeEvent<string>) => void;
   onFileChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
@@ -37,9 +35,7 @@ const copyCommandToClipBoard = () => {
  */
 const ProcessController: React.FC<ProcessControllerProps> = ({
   thresholdToShowProcess,
-  canvasWidth,
   onThresholdChange,
-  onWidthChange,
   selectedExample,
   onExampleChange,
   onFileChange,
@@ -126,25 +122,6 @@ const ProcessController: React.FC<ProcessControllerProps> = ({
             marks={[
               { value: 0, label: '0 sec' },
               { value: 30, label: '30 sec' },
-            ]}
-            valueLabelDisplay="on"
-          />
-        </Grid2>
-
-        <Grid2 size={3}>
-          <Typography align="right">Canvas Width (px)</Typography>
-        </Grid2>
-        <Grid2 size={9}>
-          <Slider
-            size="small"
-            value={canvasWidth}
-            onChange={(_, value) => onWidthChange(value as number)}
-            min={400}
-            max={10000}
-            step={50}
-            marks={[
-              { value: 400, label: '400 px' },
-              { value: 10000, label: '10000 px' },
             ]}
             valueLabelDisplay="on"
           />

@@ -1,6 +1,6 @@
-import React, { useRef, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { Process, generateColorMap } from './ProcessUtils';
-import { Box, Typography } from '@mui/material';
+import { Box, Container, Typography } from '@mui/material';
 import ProcessCanvas from './ProcessCanvas';
 
 interface ProcessVisualizerProps {
@@ -30,19 +30,17 @@ const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
   hoveredProcess,
   mousePosition,
 }) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-
   // Generate color map once when processes change
   const colorMap = useMemo(() => generateColorMap(processes), [processes]);
 
   return (
-    <Box>
+    <Container maxWidth={false}>
       {processes.length === 0 ? (
         <Typography variant="body1">
           No processes to display. Try reducing the minimum duration.
         </Typography>
       ) : (
-        <Box sx={{ overflowX: 'auto' }} ref={containerRef}>
+        <Box sx={{ width: '100%' }}>
           <ProcessCanvas
             processes={processes}
             width={canvasWidth}
@@ -80,7 +78,7 @@ const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
           )}
         </Box>
       )}
-    </Box>
+    </Container>
   );
 };
 
