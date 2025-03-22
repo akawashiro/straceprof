@@ -18,9 +18,10 @@ import { exampleLogs } from './LogExamples';
 
 interface ProcessControllerProps {
   thresholdToShowProcess: number;
-  canvasWidth: number;
   onThresholdChange: (value: number) => void;
-  onWidthChange: (value: number) => void;
+  timeRange: [number, number];
+  globalTimeRange: [number, number];
+  onTimeRangeChange: (value: [number, number]) => void;
   selectedExample: string;
   onExampleChange: (event: SelectChangeEvent<string>) => void;
   onFileChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
@@ -37,9 +38,10 @@ const copyCommandToClipBoard = () => {
  */
 const ProcessController: React.FC<ProcessControllerProps> = ({
   thresholdToShowProcess,
-  canvasWidth,
   onThresholdChange,
-  onWidthChange,
+  timeRange,
+  globalTimeRange,
+  onTimeRangeChange,
   selectedExample,
   onExampleChange,
   onFileChange,
@@ -49,6 +51,12 @@ const ProcessController: React.FC<ProcessControllerProps> = ({
   const handleUploadClick = () => {
     fileInputRef.current?.click();
   };
+
+  // Format time values for display (convert to seconds with 1 decimal place)
+  const formatTime = (value: number) => {
+    return `${value.toFixed(1)} sec`;
+  };
+
   return (
     <Container maxWidth="lg">
       <Box
@@ -130,23 +138,31 @@ const ProcessController: React.FC<ProcessControllerProps> = ({
             valueLabelDisplay="on"
           />
         </Grid2>
-
         <Grid2 size={3}>
-          <Typography align="right">Canvas Width (px)</Typography>
+          <Typography align="right">Time range to visualize (sec)</Typography>
         </Grid2>
         <Grid2 size={9}>
           <Slider
             size="small"
-            value={canvasWidth}
-            onChange={(_, value) => onWidthChange(value as number)}
-            min={400}
-            max={10000}
-            step={50}
+            value={timeRange}
+            onChange={(_, value) =>
+              onTimeRangeChange(value as [number, number])
+            }
+            min={globalTimeRange[0]}
+            max={globalTimeRange[1]}
             marks={[
-              { value: 400, label: '400 px' },
-              { value: 10000, label: '10000 px' },
+              {
+                value: globalTimeRange[0],
+                label: formatTime(globalTimeRange[0]),
+              },
+              {
+                value: globalTimeRange[1],
+                label: formatTime(globalTimeRange[1]),
+              },
             ]}
             valueLabelDisplay="on"
+            valueLabelFormat={formatTime}
+            disableSwap
           />
         </Grid2>
       </Grid2>

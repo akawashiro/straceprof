@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Process, calculateProcessVcpuAllocation } from './ProcessUtils';
-import { Box } from '@mui/material';
+import { Box, useTheme } from '@mui/material';
 
 interface ProcessCanvasProps {
   processes: Process[];
@@ -8,6 +8,7 @@ interface ProcessCanvasProps {
   height: number;
   title: string;
   thresholdToShowProcess: number;
+  timeRange: [number, number];
   colorMap: Record<string, string>;
   onHover?: (
     process: Process | null,
@@ -55,6 +56,9 @@ interface ProcessRect {
 // Fixed height for each process row, slightly larger than text size
 const PROCESS_ROW_HEIGHT = 30; // For 12px font
 
+// Padding inside the canvas (in pixels)
+const CANVAS_PADDING = 5;
+
 /**
  * ProcessCanvas component for rendering the process visualization canvas
  */
@@ -64,10 +68,12 @@ const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
   height,
   title,
   thresholdToShowProcess,
+  timeRange,
   colorMap,
   onHover,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const theme = useTheme();
 
   // State for hover detection
   const [processRects, setProcessRects] = useState<ProcessRect[]>([]);
@@ -138,16 +144,12 @@ const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
     // Reset process rectangles
     const newProcessRects: ProcessRect[] = [];
 
-    // Calculate time range
-    let offsetTime = Number.MAX_SAFE_INTEGER;
-    let maxTime = 0;
+    // Get the minimum start time to calculate relative times
+    const processMinTime = Math.min(...processes.map((p) => p.startTime));
 
-    for (const process of filteredProcesses) {
-      offsetTime = Math.min(offsetTime, process.startTime);
-      maxTime = Math.max(maxTime, process.endTime);
-    }
-
-    const timeRange = maxTime - offsetTime;
+    // Use the provided time range (which is now relative to the start of the trace)
+    const [startTime, endTime] = timeRange;
+    const visibleTimeRange = endTime - startTime;
 
     // Calculate process layout (which vCPU each process runs on)
     const processToVcpu = calculateProcessVcpuAllocation(
@@ -165,26 +167,36 @@ const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
       canvas.height = requiredHeight;
     }
 
-    // Use the provided color map from props
+    // Calculate effective drawing area with padding
+    const effectiveWidth = canvas.width - CANVAS_PADDING * 2;
+    const effectiveHeight = canvas.height - CANVAS_PADDING * 2;
 
     // Draw title
-    ctx.font = '16px Arial';
-    ctx.fillText(title, 10, 20);
+    ctx.font = `20px ${theme.typography.fontFamily}`;
+    ctx.textAlign = 'center';
+    ctx.fillText(title, canvas.width / 2, 20 + CANVAS_PADDING);
+    ctx.textAlign = 'left'; // Reset text alignment for other text elements
 
     // Draw time axis
     ctx.fillStyle = '#000000';
-    ctx.font = '10px Arial';
+    ctx.font = `10px ${theme.typography.fontFamily}`;
 
-    const xTickInterval = Math.max(Math.floor(timeRange / 10), 1);
-    for (let t = 0; t <= timeRange; t += xTickInterval) {
-      const x = (t / timeRange) * width;
-      ctx.fillText(`${t}s`, x, 35); // Position at top below title
+    // Calculate tick interval based on visible time range
+    const xTickInterval = Math.max(Math.floor(visibleTimeRange / 10), 1);
+
+    // Draw time axis ticks and grid lines
+    for (let t = 0; t <= visibleTimeRange; t += xTickInterval) {
+      const x = (t / visibleTimeRange) * effectiveWidth + CANVAS_PADDING;
+
+      // Format time label (seconds from start time)
+      const timeLabel = `${t.toFixed(1)}s`;
+      ctx.fillText(timeLabel, x, 45 + CANVAS_PADDING); // Position at top below title
 
       // Draw light grid line
       ctx.strokeStyle = '#EEEEEE';
       ctx.beginPath();
-      ctx.moveTo(x, 45); // Start below time labels
-      ctx.lineTo(x, height);
+      ctx.moveTo(x, 45 + CANVAS_PADDING); // Start below time labels
+      ctx.lineTo(x, effectiveHeight + CANVAS_PADDING);
       ctx.stroke();
     }
 
@@ -193,12 +205,26 @@ const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
       const process = filteredProcesses[i];
       const vcpu = processToVcpu[i];
 
-      // Calculate rectangle dimensions
-      const startX = ((process.startTime - offsetTime) / timeRange) * width;
-      const endX = ((process.endTime - offsetTime) / timeRange) * width;
+      // Calculate visible portion of the process within the time range using relative time
+      const relativeStartTime = process.startTime - processMinTime;
+      const relativeEndTime = process.endTime - processMinTime;
+
+      const visibleStartTime = Math.max(relativeStartTime, startTime);
+      const visibleEndTime = Math.min(relativeEndTime, endTime);
+
+      // Skip if process is completely outside the visible time range
+      if (visibleEndTime <= visibleStartTime) continue;
+
+      // Calculate rectangle dimensions with padding
+      const startX =
+        ((visibleStartTime - startTime) / visibleTimeRange) * effectiveWidth +
+        CANVAS_PADDING;
+      const endX =
+        ((visibleEndTime - startTime) / visibleTimeRange) * effectiveWidth +
+        CANVAS_PADDING;
       const rectWidth = endX - startX;
 
-      const startY = vcpu * PROCESS_ROW_HEIGHT + 50; // Adjusted to account for time axis at top
+      const startY = vcpu * PROCESS_ROW_HEIGHT + 60 + CANVAS_PADDING; // Adjusted to account for time axis at top
       const rectHeight = PROCESS_ROW_HEIGHT - 2; // -2 for spacing between rows
 
       // Store rectangle information for hover detection
@@ -215,14 +241,10 @@ const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
       ctx.fillStyle = colorMap[programName] || '#CCCCCC';
       ctx.fillRect(startX, startY, rectWidth, rectHeight);
 
-      // Draw border
-      ctx.strokeStyle = '#000000';
-      ctx.strokeRect(startX, startY, rectWidth, rectHeight);
-
       // Draw text if rectangle is wide enough
       if (rectWidth > 10) {
         ctx.fillStyle = '#000000';
-        ctx.font = '12px Arial';
+        ctx.font = `12px ${theme.typography.fontFamily}`;
 
         const text = generateText(process, rectWidth, 12);
         const textX = startX + rectWidth / 2;
@@ -243,12 +265,14 @@ const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
     width,
     height,
     thresholdToShowProcess,
+    timeRange,
     title,
     colorMap,
+    theme.typography.fontFamily,
   ]);
 
   return (
-    <Box sx={{ position: 'relative' }}>
+    <Box sx={{ position: 'relative', width: '100%', overflowX: 'auto' }}>
       <canvas
         ref={canvasRef}
         style={{
@@ -256,6 +280,7 @@ const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
           borderRadius: '4px',
           maxWidth: '100%',
           height: 'auto',
+          display: 'block', // Prevents extra space below canvas
         }}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}

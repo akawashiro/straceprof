@@ -1,3 +1,16 @@
+import {
+  blue,
+  cyan,
+  deepOrange,
+  deepPurple,
+  green,
+  indigo,
+  pink,
+  purple,
+  red,
+  teal,
+} from '@mui/material/colors';
+
 /**
  * Maximum number of processes to display in the visualization
  */
@@ -147,9 +160,10 @@ export function calculateThresholdToShowProcess(processes: Process[]): number {
  * @param thresholdToShowProcess Minimum duration threshold in seconds
  * @returns Array of vCPU assignments for each process
  */
+
 /**
  * Generate a color map for processes based on program names
- * Similar to the Python implementation's gen_color_map function
+ * Using MUI color palette for better visual consistency
  */
 export function generateColorMap(processes: Process[]): Record<string, string> {
   // Count total duration for each program
@@ -168,16 +182,19 @@ export function generateColorMap(processes: Process[]): Record<string, string> {
   const coloredPrograms = Object.entries(histogram);
   coloredPrograms.sort((a, b) => b[1] - a[1]);
 
-  // Assign colors to programs
+  // Assign colors to programs using MUI color palette
+  // Using higher saturation values (700, 800) for better visibility
   const colorList = [
-    '#FF0000', // red
-    '#FFA500', // orange
-    '#FFFF00', // yellow
-    '#FF00FF', // magenta
-    '#800080', // purple
-    '#0000FF', // blue
-    '#00FFFF', // cyan
-    '#008000', // green
+    red[700], // red
+    deepOrange[700], // deep orange
+    purple[700], // purple
+    deepPurple[700], // deep purple
+    indigo[700], // indigo
+    blue[700], // blue
+    cyan[700], // cyan
+    teal[700], // teal
+    green[700], // green
+    pink[700], // pink
   ];
 
   const colorMap: Record<string, string> = {};

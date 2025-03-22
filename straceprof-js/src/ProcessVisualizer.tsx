@@ -1,12 +1,13 @@
-import React, { useRef, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { Process, generateColorMap } from './ProcessUtils';
-import { Box, Typography } from '@mui/material';
+import { Box, Container, Typography } from '@mui/material';
 import ProcessCanvas from './ProcessCanvas';
 
 interface ProcessVisualizerProps {
   processes: Process[];
   title?: string;
   thresholdToShowProcess: number;
+  timeRange: [number, number];
   canvasWidth: number;
   canvasHeight: number;
   onHoverProcess: (
@@ -24,31 +25,32 @@ const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
   processes,
   title = 'Process Visualization',
   thresholdToShowProcess,
+  timeRange,
   canvasWidth,
   canvasHeight,
   onHoverProcess,
   hoveredProcess,
   mousePosition,
 }) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-
   // Generate color map once when processes change
   const colorMap = useMemo(() => generateColorMap(processes), [processes]);
 
   return (
-    <Box>
+    <Container maxWidth={false} sx={{ px: 3 }}>
       {processes.length === 0 ? (
         <Typography variant="body1">
-          No processes to display. Try reducing the minimum duration.
+          No processes to display. Try reducing the minimum duration or
+          adjusting the time range.
         </Typography>
       ) : (
-        <Box sx={{ overflowX: 'auto' }} ref={containerRef}>
+        <Box sx={{ width: '100%' }}>
           <ProcessCanvas
             processes={processes}
             width={canvasWidth}
             height={canvasHeight}
             title={title}
             thresholdToShowProcess={thresholdToShowProcess}
+            timeRange={timeRange}
             onHover={onHoverProcess}
             colorMap={colorMap}
           />
@@ -80,7 +82,7 @@ const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
           )}
         </Box>
       )}
-    </Box>
+    </Container>
   );
 };
 
