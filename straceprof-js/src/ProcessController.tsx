@@ -88,7 +88,7 @@ const ProcessController: React.FC<ProcessControllerProps> = ({
         </Grid2>
         <Grid2 size={3}>
           <FormControl sx={{ minWidth: 200 }}>
-            <InputLabel id="example-select-label">Load s sample Log</InputLabel>
+            <InputLabel id="example-select-label">Load a sample Log</InputLabel>
             <Select
               labelId="example-select-label"
               value={selectedExample}
