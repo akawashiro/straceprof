@@ -1,11 +1,5 @@
 import { useState, useEffect } from 'react';
-import {
-  Box,
-  Typography,
-  Divider,
-  CircularProgress,
-  Container,
-} from '@mui/material';
+import { Box, Typography, CircularProgress, Container } from '@mui/material';
 import {
   Process,
   getProcessesFromLog,
@@ -107,6 +101,9 @@ function App() {
     setSelectedFile(file);
 
     if (file) {
+      // Set loading state to true when file is selected
+      setIsLoading(true);
+
       // Clear selected example when a file is uploaded
       setSelectedExample('');
 
@@ -129,8 +126,17 @@ function App() {
           updateCanvasDimensions(parsedProcesses, calculatedThreshold);
         } catch (error) {
           console.error('Error parsing strace log:', error);
+        } finally {
+          // Set loading state to false when processing is complete
+          setIsLoading(false);
         }
       };
+
+      reader.onerror = () => {
+        console.error('Error reading file');
+        setIsLoading(false);
+      };
+
       reader.readAsText(file);
     }
   };
@@ -159,21 +165,23 @@ function App() {
 
   return (
     <Box sx={{ width: '100%', height: '100%', textAlign: 'center' }}>
-      {selectedFile && (
-        <Box sx={{ mt: 3, textAlign: 'left' }}>
-          <Typography variant="h6" gutterBottom>
-            File Information:
-          </Typography>
-          <Divider sx={{ mb: 2 }} />
-          <Typography variant="body1">Name: {selectedFile.name}</Typography>
-          <Typography variant="body1">
-            Size: {(selectedFile.size / 1024).toFixed(2)} KB
-          </Typography>
-          <Typography variant="body1">
-            Type: {selectedFile.type || 'Unknown'}
-          </Typography>
-        </Box>
-      )}
+      <Container maxWidth={'lg'}>
+        <Typography variant={'h1'}>straceprof</Typography>
+        <Typography>
+          straceprof is a profiler designed for multi-process programs.
+          straceprof can take profile of any process when you can run it under
+          strace. It is particularly well-suited for profiling build processes
+          such as those initiated by make, cmake, shell scripts, or docker
+          build. Upload the result of{' '}
+          <code>
+            {' '}
+            strace --trace=execve,execveat,exit,exit_group --follow-forks
+            --string-limit=1000 -ttt --output=straceprof.log &lt;comamnd to
+            profile&gt;{' '}
+          </code>{' '}
+          and visualize it.
+        </Typography>
+      </Container>
 
       {isLoading && (
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
@@ -187,24 +195,6 @@ function App() {
 
       {!isLoading && processes.length > 0 && (
         <>
-          <Container maxWidth={'lg'}>
-            <Typography variant={'h1'}>straceprof</Typography>
-            <Typography>
-              straceprof is a profiler designed for multi-process programs.
-              straceprof can take profile of any process when you can run it
-              under strace. It is particularly well-suited for profiling build
-              processes such as those initiated by make, cmake, shell scripts,
-              or docker build. Upload the result of{' '}
-              <code>
-                {' '}
-                strace --trace=execve,execveat,exit,exit_group --follow-forks
-                --string-limit=1000 -ttt --output=straceprof.log &lt;comamnd to
-                profile&gt;{' '}
-              </code>{' '}
-              and visualize it.
-            </Typography>
-          </Container>
-
           <Box sx={{ mt: 4, mb: 2 }}>
             <ProcessController
               thresholdToShowProcess={thresholdToShowProcess}
