@@ -147,6 +147,47 @@ export function calculateThresholdToShowProcess(processes: Process[]): number {
  * @param thresholdToShowProcess Minimum duration threshold in seconds
  * @returns Array of vCPU assignments for each process
  */
+/**
+ * Generate a color map for processes based on program names
+ * Similar to the Python implementation's gen_color_map function
+ */
+export function generateColorMap(processes: Process[]): Record<string, string> {
+  // Count total duration for each program
+  const histogram: Record<string, number> = {};
+
+  for (const process of processes) {
+    const programName = process.program.split('/').pop() || process.program;
+    if (histogram[programName]) {
+      histogram[programName] += process.endTime - process.startTime;
+    } else {
+      histogram[programName] = process.endTime - process.startTime;
+    }
+  }
+
+  // Sort programs by total duration
+  const coloredPrograms = Object.entries(histogram);
+  coloredPrograms.sort((a, b) => b[1] - a[1]);
+
+  // Assign colors to programs
+  const colorList = [
+    '#FF0000', // red
+    '#FFA500', // orange
+    '#FFFF00', // yellow
+    '#FF00FF', // magenta
+    '#800080', // purple
+    '#0000FF', // blue
+    '#00FFFF', // cyan
+    '#008000', // green
+  ];
+
+  const colorMap: Record<string, string> = {};
+  for (let i = 0; i < Math.min(coloredPrograms.length, colorList.length); i++) {
+    colorMap[coloredPrograms[i][0]] = colorList[i];
+  }
+
+  return colorMap;
+}
+
 export function calculateProcessVcpuAllocation(
   processes: Process[],
   thresholdToShowProcess: number

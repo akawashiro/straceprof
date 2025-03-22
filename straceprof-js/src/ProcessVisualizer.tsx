@@ -1,8 +1,9 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useMemo } from 'react';
 import {
   Process,
   calculateThresholdToShowProcess,
   calculateProcessVcpuAllocation,
+  generateColorMap,
 } from './ProcessUtils';
 import { Box, Typography } from '@mui/material';
 import ProcessCanvas from './ProcessCanvas';
@@ -62,6 +63,9 @@ const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
     });
   }, [processes, thresholdToShowProcess]); // Re-calculate when processes or threshold changes
 
+  // Generate color map once when processes change
+  const colorMap = useMemo(() => generateColorMap(processes), [processes]);
+
   // State for hover functionality
   const [hoveredProcess, setHoveredProcess] = useState<Process | null>(null);
   const [mousePosition, setMousePosition] = useState<{
@@ -119,6 +123,7 @@ const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
             title={title}
             thresholdToShowProcess={thresholdToShowProcess}
             onHover={handleHover}
+            colorMap={colorMap}
           />
           {hoveredProcess && mousePosition && (
             <div
