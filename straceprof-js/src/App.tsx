@@ -1,5 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Box, Typography, Divider, CircularProgress } from '@mui/material';
+import {
+  Box,
+  Typography,
+  Divider,
+  CircularProgress,
+  Container,
+} from '@mui/material';
 import {
   Process,
   getProcessesFromLog,
@@ -188,6 +194,20 @@ function App() {
 
       {!isLoading && processes.length > 0 && (
         <>
+          <Container maxWidth={'lg'}>
+            <Typography variant={'h1'}>straceprof</Typography>
+            <Typography>
+              straceprof is a profiler designed for multi-process programs.
+              straceprof can take profile of any process when you can run it
+              under strace. It is particularly well-suited for profiling build
+              processes such as those initiated by make, cmake, shell scripts,
+              or docker build. Upload the result of strace
+              --trace=execve,execveat,exit,exit_group --follow-forks
+              --string-limit=1000 -ttt --output=straceprof.log &lt;comamnd to
+              profile&gt; and visualize it.
+            </Typography>
+          </Container>
+
           <Box sx={{ mt: 4, mb: 2 }}>
             <ProcessController
               thresholdToShowProcess={thresholdToShowProcess}

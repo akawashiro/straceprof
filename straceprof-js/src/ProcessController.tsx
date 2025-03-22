@@ -13,6 +13,7 @@ import {
   Button,
 } from '@mui/material';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { exampleLogs } from './LogExamples';
 
 interface ProcessControllerProps {
@@ -26,6 +27,12 @@ interface ProcessControllerProps {
   onExampleChange: (event: SelectChangeEvent<string>) => void;
   onFileChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
+
+const copyCommandToClipBoard = () => {
+  navigator.clipboard.writeText(
+    'strace --trace=execve,execveat,exit,exit_group --follow-forks --string-limit=1000 -ttt --output=straceprof.log <comamnd to profile>'
+  );
+};
 
 /**
  * ProcessController component for controlling canvas parameters and log selection
@@ -65,13 +72,14 @@ const ProcessController: React.FC<ProcessControllerProps> = ({
       />
 
       <Grid2 container spacing={2}>
-        <Grid2 size={9}>
-          <Typography>
-            Take a strace log using strace
-            --trace=execve,execveat,exit,exit_group --follow-forks
-            --string-limit=1000 -ttt --output=straceprof.log "command to
-            profile" and upload log:{' '}
-          </Typography>
+        <Grid2 size={6}>
+          <Button
+            variant="contained"
+            startIcon={<ContentCopyIcon />}
+            onClick={copyCommandToClipBoard}
+          >
+            Copy the command line snippet to take a profile log
+          </Button>
         </Grid2>
         <Grid2 size={3}>
           <Button
@@ -82,17 +90,14 @@ const ProcessController: React.FC<ProcessControllerProps> = ({
             Upload log
           </Button>
         </Grid2>
-        <Grid2 size={9}>
-          <Typography>Load a sample log</Typography>
-        </Grid2>
         <Grid2 size={3}>
           <FormControl sx={{ minWidth: 200 }}>
-            <InputLabel id="example-select-label">Example Log</InputLabel>
+            <InputLabel id="example-select-label">Load s sample Log</InputLabel>
             <Select
               labelId="example-select-label"
               value={selectedExample}
               onChange={onExampleChange}
-              label="Example Log"
+              label="Load a sample log"
               MenuProps={{
                 PaperProps: {
                   style: {
