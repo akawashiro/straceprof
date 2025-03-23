@@ -6,6 +6,7 @@ import {
   Container,
   Box,
   CircularProgress,
+  TextField,
 } from '@mui/material';
 
 interface ProcessControllerProps {
@@ -15,6 +16,8 @@ interface ProcessControllerProps {
   globalTimeRange: [number, number];
   setTimeRange: (value: [number, number]) => void;
   isLoading: boolean;
+  regexpFilterProcess: string;
+  setRegexpFilterProcess: (value: string) => void;
 }
 
 /**
@@ -27,6 +30,8 @@ const ProcessController: React.FC<ProcessControllerProps> = ({
   globalTimeRange,
   setTimeRange,
   isLoading,
+  regexpFilterProcess,
+  setRegexpFilterProcess,
 }) => {
   // Format time values for display (convert to seconds with 1 decimal place)
   const formatTime = (value: number) => {
@@ -99,6 +104,19 @@ const ProcessController: React.FC<ProcessControllerProps> = ({
                 valueLabelDisplay="on"
                 valueLabelFormat={formatTime}
                 disableSwap
+              />
+            </Grid2>
+            <Grid2 size={3}>
+              <Typography align="right">Filter processes by regexp</Typography>
+            </Grid2>
+            <Grid2 size={9}>
+              <TextField
+                fullWidth
+                size="small"
+                value={regexpFilterProcess}
+                onChange={(e) => setRegexpFilterProcess(e.target.value)}
+                placeholder="Regular expression to filter processes"
+                helperText="Default: ^.*$ (matches all processes)"
               />
             </Grid2>
           </Grid2>

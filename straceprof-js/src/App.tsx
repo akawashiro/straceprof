@@ -15,6 +15,8 @@ function App() {
   const [thresholdToShowProcess, setThresholdToShowProcess] =
     useState<number>(0);
   const [timeRange, setTimeRange] = useState<[number, number]>([0, 0]);
+  const [regexpFilterProcess, setRegexpFilterProcess] =
+    useState<string>('^.*$');
 
   // Calculate global time range from all processes
   const globalTimeRange = useMemo(() => {
@@ -57,6 +59,8 @@ function App() {
           globalTimeRange={globalTimeRange}
           setTimeRange={setTimeRange}
           isLoading={isLoading}
+          regexpFilterProcess={regexpFilterProcess}
+          setRegexpFilterProcess={setRegexpFilterProcess}
         />
       </Box>
       <ProcessVisualizer
@@ -65,6 +69,7 @@ function App() {
         thresholdToShowProcess={thresholdToShowProcess}
         timeRange={timeRange}
         isLoading={isLoading}
+        regexpFilterProcess={regexpFilterProcess}
       />
     </Box>
   );
