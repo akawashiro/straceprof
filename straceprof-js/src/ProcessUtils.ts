@@ -238,3 +238,20 @@ export function calculateProcessVcpuAllocation(
 
   return processToVcpu;
 }
+
+/**
+ * Calculate global time range from all processes
+ * @param processes Array of Process objects
+ * @returns Tuple of [min, max] time range, using relative time [0, maxTime - minTime]
+ */
+export function calculateGlobalTimeRange(
+  processes: Process[]
+): [number, number] {
+  if (processes.length === 0) return [0, 0];
+
+  const minTime = Math.min(...processes.map((p) => p.startTime));
+  const maxTime = Math.max(...processes.map((p) => p.endTime));
+
+  // Use relative time: [0, maxTime - minTime] instead of [minTime, maxTime]
+  return [0, maxTime - minTime];
+}

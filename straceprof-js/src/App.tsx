@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { Box, Typography, Container } from '@mui/material';
-import { Process } from './ProcessUtils';
+import { Process, calculateGlobalTimeRange } from './ProcessUtils';
 import ProcessVisualizer from './ProcessVisualizer';
 import ProcessController from './ProcessController';
 import LogFileSelector from './LogFileSelector';
@@ -18,13 +18,7 @@ function App() {
 
   // Calculate global time range from all processes
   const globalTimeRange = useMemo(() => {
-    if (processes.length === 0) return [0, 0] as [number, number];
-
-    const minTime = Math.min(...processes.map((p) => p.startTime));
-    const maxTime = Math.max(...processes.map((p) => p.endTime));
-
-    // Use relative time: [0, maxTime - minTime] instead of [minTime, maxTime]
-    return [0, maxTime - minTime] as [number, number];
+    return calculateGlobalTimeRange(processes);
   }, [processes]);
 
   return (
