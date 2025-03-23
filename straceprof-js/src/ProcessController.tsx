@@ -10,10 +10,10 @@ import {
 
 interface ProcessControllerProps {
   thresholdToShowProcess: number;
-  onThresholdChange: (value: number) => void;
+  setThresholdToShowProcess: (value: number) => void;
   timeRange: [number, number];
   globalTimeRange: [number, number];
-  onTimeRangeChange: (value: [number, number]) => void;
+  setTimeRange: (value: [number, number]) => void;
   isLoading: boolean;
 }
 
@@ -22,10 +22,10 @@ interface ProcessControllerProps {
  */
 const ProcessController: React.FC<ProcessControllerProps> = ({
   thresholdToShowProcess,
-  onThresholdChange,
+  setThresholdToShowProcess,
   timeRange,
   globalTimeRange,
-  onTimeRangeChange,
+  setTimeRange,
   isLoading,
 }) => {
   // Format time values for display (convert to seconds with 1 decimal place)
@@ -61,7 +61,9 @@ const ProcessController: React.FC<ProcessControllerProps> = ({
               <Slider
                 size="small"
                 value={thresholdToShowProcess}
-                onChange={(_, value) => onThresholdChange(value as number)}
+                onChange={(_, value) =>
+                  setThresholdToShowProcess(value as number)
+                }
                 min={0}
                 max={30}
                 step={1}
@@ -81,9 +83,7 @@ const ProcessController: React.FC<ProcessControllerProps> = ({
               <Slider
                 size="small"
                 value={timeRange}
-                onChange={(_, value) =>
-                  onTimeRangeChange(value as [number, number])
-                }
+                onChange={(_, value) => setTimeRange(value as [number, number])}
                 min={globalTimeRange[0]}
                 max={globalTimeRange[1]}
                 marks={[

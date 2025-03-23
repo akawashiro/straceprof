@@ -27,16 +27,6 @@ function App() {
     return [0, maxTime - minTime] as [number, number];
   }, [processes]);
 
-  // Handle process controller changes
-  const handleThresholdChange = (value: number) => {
-    setThresholdToShowProcess(value);
-  };
-
-  // Handle time range changes
-  const handleTimeRangeChange = (value: [number, number]) => {
-    setTimeRange(value);
-  };
-
   return (
     <Box sx={{ width: '100%', height: '100%', textAlign: 'center' }}>
       <Container maxWidth={'lg'}>
@@ -68,10 +58,10 @@ function App() {
         />
         <ProcessController
           thresholdToShowProcess={thresholdToShowProcess}
-          onThresholdChange={handleThresholdChange}
+          setThresholdToShowProcess={setThresholdToShowProcess}
           timeRange={timeRange}
           globalTimeRange={globalTimeRange}
-          onTimeRangeChange={handleTimeRangeChange}
+          setTimeRange={setTimeRange}
           isLoading={isLoading}
         />
       </Box>
