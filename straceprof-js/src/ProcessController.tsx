@@ -1,57 +1,38 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import {
   Typography,
   Slider,
   Grid2,
   Container,
   Box,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  SelectChangeEvent,
-  Button,
+  CircularProgress,
+  TextField,
 } from '@mui/material';
-import UploadFileIcon from '@mui/icons-material/UploadFile';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import { exampleLogs } from './LogExamples';
 
 interface ProcessControllerProps {
   thresholdToShowProcess: number;
-  onThresholdChange: (value: number) => void;
+  setThresholdToShowProcess: (value: number) => void;
   timeRange: [number, number];
   globalTimeRange: [number, number];
-  onTimeRangeChange: (value: [number, number]) => void;
-  selectedExample: string;
-  onExampleChange: (event: SelectChangeEvent<string>) => void;
-  onFileChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  setTimeRange: (value: [number, number]) => void;
+  isLoading: boolean;
+  regexpFilterProcess: string;
+  setRegexpFilterProcess: (value: string) => void;
 }
 
-const copyCommandToClipBoard = () => {
-  navigator.clipboard.writeText(
-    'strace --trace=execve,execveat,exit,exit_group --follow-forks --string-limit=1000 -ttt --output=straceprof.log <comamnd to profile>'
-  );
-};
-
 /**
- * ProcessController component for controlling canvas parameters and log selection
+ * ProcessController component for controlling canvas parameters
  */
 const ProcessController: React.FC<ProcessControllerProps> = ({
   thresholdToShowProcess,
-  onThresholdChange,
+  setThresholdToShowProcess,
   timeRange,
   globalTimeRange,
-  onTimeRangeChange,
-  selectedExample,
-  onExampleChange,
-  onFileChange,
+  setTimeRange,
+  isLoading,
+  regexpFilterProcess,
+  setRegexpFilterProcess,
 }) => {
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const handleUploadClick = () => {
-    fileInputRef.current?.click();
-  };
-
   // Format time values for display (convert to seconds with 1 decimal place)
   const formatTime = (value: number) => {
     return `${value.toFixed(1)} sec`;
@@ -59,113 +40,88 @@ const ProcessController: React.FC<ProcessControllerProps> = ({
 
   return (
     <Container maxWidth="lg">
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          gap: 2,
-          mb: 2,
-        }}
-      ></Box>
-      <input
-        type="file"
-        ref={fileInputRef}
-        onChange={onFileChange}
-        style={{ display: 'none' }}
-      />
+      {isLoading ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+          <CircularProgress />
+        </Box>
+      ) : (
+        <>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              gap: 2,
+              mb: 2,
+            }}
+          ></Box>
 
-      <Grid2 container spacing={2}>
-        <Grid2 size={6}>
-          <Button
-            variant="contained"
-            startIcon={<ContentCopyIcon />}
-            onClick={copyCommandToClipBoard}
-          >
-            Copy the command line snippet to take a profile log
-          </Button>
-        </Grid2>
-        <Grid2 size={3}>
-          <Button
-            variant="contained"
-            startIcon={<UploadFileIcon />}
-            onClick={handleUploadClick}
-          >
-            Upload log
-          </Button>
-        </Grid2>
-        <Grid2 size={3}>
-          <FormControl sx={{ minWidth: 200 }}>
-            <InputLabel id="example-select-label">Load a sample Log</InputLabel>
-            <Select
-              labelId="example-select-label"
-              value={selectedExample}
-              onChange={onExampleChange}
-              label="Load a sample log"
-              MenuProps={{
-                PaperProps: {
-                  style: {
-                    maxHeight: 48 * 4.5,
+          <Grid2 container spacing={2}>
+            <Grid2 size={3}>
+              <Typography align="right">
+                Threshold to show processes (sec)
+              </Typography>
+            </Grid2>
+            <Grid2 size={9}>
+              <Slider
+                size="small"
+                value={thresholdToShowProcess}
+                onChange={(_, value) =>
+                  setThresholdToShowProcess(value as number)
+                }
+                min={0}
+                max={30}
+                step={1}
+                marks={[
+                  { value: 0, label: '0 sec' },
+                  { value: 30, label: '30 sec' },
+                ]}
+                valueLabelDisplay="on"
+              />
+            </Grid2>
+            <Grid2 size={3}>
+              <Typography align="right">
+                Time range to visualize (sec)
+              </Typography>
+            </Grid2>
+            <Grid2 size={9}>
+              <Slider
+                size="small"
+                value={timeRange}
+                onChange={(_, value) => setTimeRange(value as [number, number])}
+                min={globalTimeRange[0]}
+                max={globalTimeRange[1]}
+                marks={[
+                  {
+                    value: globalTimeRange[0],
+                    label: formatTime(globalTimeRange[0]),
                   },
-                },
-              }}
-            >
-              {Object.entries(exampleLogs).map(([key, { name }]) => (
-                <MenuItem key={key} value={key}>
-                  {name}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </Grid2>
-        <Grid2 size={3}>
-          <Typography align="right">
-            Threshold to show processes (sec)
-          </Typography>
-        </Grid2>
-        <Grid2 size={9}>
-          <Slider
-            size="small"
-            value={thresholdToShowProcess}
-            onChange={(_, value) => onThresholdChange(value as number)}
-            min={0}
-            max={30}
-            step={1}
-            marks={[
-              { value: 0, label: '0 sec' },
-              { value: 30, label: '30 sec' },
-            ]}
-            valueLabelDisplay="on"
-          />
-        </Grid2>
-        <Grid2 size={3}>
-          <Typography align="right">Time range to visualize (sec)</Typography>
-        </Grid2>
-        <Grid2 size={9}>
-          <Slider
-            size="small"
-            value={timeRange}
-            onChange={(_, value) =>
-              onTimeRangeChange(value as [number, number])
-            }
-            min={globalTimeRange[0]}
-            max={globalTimeRange[1]}
-            marks={[
-              {
-                value: globalTimeRange[0],
-                label: formatTime(globalTimeRange[0]),
-              },
-              {
-                value: globalTimeRange[1],
-                label: formatTime(globalTimeRange[1]),
-              },
-            ]}
-            valueLabelDisplay="on"
-            valueLabelFormat={formatTime}
-            disableSwap
-          />
-        </Grid2>
-      </Grid2>
+                  {
+                    value: globalTimeRange[1],
+                    label: formatTime(globalTimeRange[1]),
+                  },
+                ]}
+                valueLabelDisplay="on"
+                valueLabelFormat={formatTime}
+                disableSwap
+              />
+            </Grid2>
+            <Grid2 size={3}>
+              <Typography align="right">Filter processes by regexp</Typography>
+            </Grid2>
+            <Grid2 size={9}>
+              <TextField
+                fullWidth
+                size="small"
+                value={regexpFilterProcess}
+                onChange={(e) => setRegexpFilterProcess(e.target.value)}
+                placeholder="Regular expression to filter processes"
+                helperText="Default: ^.*$ (matches all processes)"
+              />
+            </Grid2>
+          </Grid2>
+        </>
+      )}
     </Container>
   );
 };

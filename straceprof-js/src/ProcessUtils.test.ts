@@ -1,5 +1,9 @@
 import { describe, expect, test } from '@jest/globals';
-import { getProcessesFromLog, parseExecveLine } from './ProcessUtils';
+import {
+  getProcessesFromLog,
+  parseExecveLine,
+  calculateGlobalTimeRange,
+} from './ProcessUtils';
 
 /**
  * Tests for ProcessUtils functions
@@ -47,5 +51,44 @@ describe('ProcessUtils', () => {
     expect(actual.program).toContain('/usr/bin/ls');
     expect(actual.fullCommand).toContain('ls');
     expect(actual.fullCommand).toContain('-1');
+  });
+
+  test('calculateGlobalTimeRange should return correct time range', () => {
+    // Create sample processes with different start and end times
+    const processes = [
+      {
+        pid: 1,
+        startTime: 100,
+        endTime: 200,
+        program: 'program1',
+        fullCommand: 'program1 arg1',
+      },
+      {
+        pid: 2,
+        startTime: 150,
+        endTime: 250,
+        program: 'program2',
+        fullCommand: 'program2 arg1 arg2',
+      },
+      {
+        pid: 3,
+        startTime: 50,
+        endTime: 300,
+        program: 'program3',
+        fullCommand: 'program3',
+      },
+    ];
+
+    // Call the function with the sample input
+    const timeRange = calculateGlobalTimeRange(processes);
+
+    // Check the calculated time range
+    // Min time should be 0 (relative to the earliest start time)
+    // Max time should be the difference between the latest end time and earliest start time
+    expect(timeRange[0]).toBe(0);
+    expect(timeRange[1]).toBe(300 - 50); // 250
+
+    // Test with empty array
+    expect(calculateGlobalTimeRange([])).toEqual([0, 0]);
   });
 });

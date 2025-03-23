@@ -1,227 +1,27 @@
-import { useState, useEffect, useMemo } from 'react';
-import { Box, Typography, CircularProgress, Container } from '@mui/material';
-import {
-  Process,
-  getProcessesFromLog,
-  calculateThresholdToShowProcess,
-  calculateProcessVcpuAllocation,
-} from './ProcessUtils';
+import { useState, useMemo } from 'react';
+import { Box, Typography, Container } from '@mui/material';
+import { Process, calculateGlobalTimeRange } from './ProcessUtils';
 import ProcessVisualizer from './ProcessVisualizer';
 import ProcessController from './ProcessController';
-import { exampleLogs } from './LogExamples';
-import NoProcessesFound from './NoProcessesFound';
-import { fetchLog } from './LogUtils';
+import LogFileSelector from './LogFileSelector';
+// Removed unused imports
 
 function App() {
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [fileContent, setFileContent] = useState<string>('');
   const [processes, setProcesses] = useState<Process[]>([]);
-  const [selectedExample, setSelectedExample] = useState<string>('npm_install');
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [title, setTitle] = useState<string>('Sample Log Visualization');
 
   // Canvas control state
   const [thresholdToShowProcess, setThresholdToShowProcess] =
     useState<number>(0);
   const [timeRange, setTimeRange] = useState<[number, number]>([0, 0]);
-  const [canvasDimensions, setCanvasDimensions] = useState({
-    width: window.innerWidth * 0.9, // Initial width based on window size
-    height: 800, // Initial height, will be auto-adjusted based on processes
-  });
-
-  // State for hover functionality
-  const [hoveredProcess, setHoveredProcess] = useState<Process | null>(null);
-  const [mousePosition, setMousePosition] = useState<{
-    x: number;
-    y: number;
-  } | null>(null);
+  const [regexpFilterProcess, setRegexpFilterProcess] =
+    useState<string>('^.*$');
 
   // Calculate global time range from all processes
   const globalTimeRange = useMemo(() => {
-    if (processes.length === 0) return [0, 0] as [number, number];
-
-    const minTime = Math.min(...processes.map((p) => p.startTime));
-    const maxTime = Math.max(...processes.map((p) => p.endTime));
-
-    // Use relative time: [0, maxTime - minTime] instead of [minTime, maxTime]
-    return [0, maxTime - minTime] as [number, number];
+    return calculateGlobalTimeRange(processes);
   }, [processes]);
-
-  // Fetch and parse logs when selected example changes
-  useEffect(() => {
-    if (selectedFile) {
-      // If a file is uploaded, don't use example logs
-      return;
-    }
-
-    if (!selectedExample) {
-      // No example selected, clear processes
-      setProcesses([]);
-      setFileContent('');
-      return;
-    }
-
-    // Fetch the selected example log
-    setIsLoading(true);
-    fetchLog(exampleLogs[selectedExample].path)
-      .then((logContent) => {
-        setFileContent(logContent);
-        const parsedProcesses = getProcessesFromLog(logContent);
-        setProcesses(parsedProcesses);
-
-        // Calculate and set the initial threshold
-        const calculatedThreshold =
-          calculateThresholdToShowProcess(parsedProcesses);
-        setThresholdToShowProcess(calculatedThreshold);
-
-        // Calculate and set the initial time range
-        if (parsedProcesses.length > 0) {
-          const minTime = Math.min(...parsedProcesses.map((p) => p.startTime));
-          const maxTime = Math.max(...parsedProcesses.map((p) => p.endTime));
-          // Use relative time range
-          setTimeRange([0, maxTime - minTime]);
-        }
-
-        // Set initial canvas dimensions based on window size and processes
-        updateCanvasDimensions(parsedProcesses, calculatedThreshold);
-      })
-      .catch((error) => {
-        console.error('Error fetching example log:', error);
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
-  }, [selectedExample, selectedFile]);
-
-  // Add window resize event listener
-  useEffect(() => {
-    const handleResize = () => {
-      setCanvasDimensions((prev) => ({
-        ...prev,
-        width: window.innerWidth * 0.9, // 90% of window width
-      }));
-    };
-
-    // Add event listener
-    window.addEventListener('resize', handleResize);
-
-    // Clean up
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, []);
-
-  // Update canvas dimensions based on processes and threshold
-  const updateCanvasDimensions = (procs: Process[], threshold: number) => {
-    // Set width to 90% of window width, with min/max constraints
-    const windowWidth = window.innerWidth;
-    const responsiveWidth = windowWidth * 0.9 + 1000;
-
-    // Use calculateProcessVcpuAllocation to determine how many vCPU rows we need
-    const processToVcpu = calculateProcessVcpuAllocation(procs, threshold);
-    const maxVcpu =
-      processToVcpu.length > 0 ? Math.max(...processToVcpu) + 1 : 0;
-
-    // Calculate height based on number of vCPUs (30px per row + 30px for title/axis)
-    const PROCESS_ROW_HEIGHT = 32;
-    const calculatedHeight = maxVcpu * PROCESS_ROW_HEIGHT + 50;
-
-    // Set minimum height of 200px
-    const initialHeight = Math.max(calculatedHeight, 200);
-
-    setCanvasDimensions({
-      width: responsiveWidth,
-      height: initialHeight,
-    });
-  };
-
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0] || null;
-    setSelectedFile(file);
-
-    if (file) {
-      // Set loading state to true when file is selected
-      setIsLoading(true);
-
-      // Clear selected example when a file is uploaded
-      setSelectedExample('');
-
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const content = e.target?.result as string;
-        setFileContent(content);
-
-        // Parse the strace log
-        try {
-          const parsedProcesses = getProcessesFromLog(content);
-          setProcesses(parsedProcesses);
-
-          // Calculate and set the initial threshold
-          const calculatedThreshold =
-            calculateThresholdToShowProcess(parsedProcesses);
-          setThresholdToShowProcess(calculatedThreshold);
-
-          // Calculate and set the initial time range
-          if (parsedProcesses.length > 0) {
-            const minTime = Math.min(
-              ...parsedProcesses.map((p) => p.startTime)
-            );
-            const maxTime = Math.max(...parsedProcesses.map((p) => p.endTime));
-            // Use relative time range
-            setTimeRange([0, maxTime - minTime]);
-          }
-
-          // Set initial canvas dimensions
-          updateCanvasDimensions(parsedProcesses, calculatedThreshold);
-        } catch (error) {
-          console.error('Error parsing strace log:', error);
-        } finally {
-          // Set loading state to false when processing is complete
-          setIsLoading(false);
-        }
-      };
-
-      reader.onerror = () => {
-        console.error('Error reading file');
-        setIsLoading(false);
-      };
-
-      reader.readAsText(file);
-    }
-  };
-
-  // Handle process controller changes
-  const handleThresholdChange = (value: number) => {
-    setThresholdToShowProcess(value);
-    updateCanvasDimensions(processes, value);
-  };
-
-  // Handle time range changes
-  const handleTimeRangeChange = (value: [number, number]) => {
-    setTimeRange(value);
-  };
-
-  // Handle hover events from ProcessCanvas
-  const handleHover = (
-    process: Process | null,
-    position: { x: number; y: number } | null
-  ) => {
-    setHoveredProcess(process);
-    setMousePosition(position);
-  };
-
-  // Filter processes based on both threshold and time range
-  const filteredProcesses = useMemo(() => {
-    if (processes.length === 0) return [];
-
-    const minTime = Math.min(...processes.map((p) => p.startTime));
-
-    return processes.filter(
-      (p) =>
-        p.endTime - p.startTime >= thresholdToShowProcess &&
-        p.startTime - minTime <= timeRange[1] &&
-        p.endTime - minTime >= timeRange[0]
-    );
-  }, [processes, thresholdToShowProcess, timeRange]);
 
   return (
     <Box sx={{ width: '100%', height: '100%', textAlign: 'center' }}>
@@ -243,53 +43,34 @@ function App() {
         </Typography>
       </Container>
 
-      {isLoading && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-          <CircularProgress />
-        </Box>
-      )}
-
-      {!isLoading && fileContent && processes.length === 0 && (
-        <NoProcessesFound fileContent={fileContent} />
-      )}
-
-      {!isLoading && processes.length > 0 && (
-        <>
-          <Box sx={{ mt: 4, mb: 2 }}>
-            <ProcessController
-              thresholdToShowProcess={thresholdToShowProcess}
-              onThresholdChange={handleThresholdChange}
-              timeRange={timeRange}
-              globalTimeRange={globalTimeRange}
-              onTimeRangeChange={handleTimeRangeChange}
-              selectedExample={selectedExample}
-              onExampleChange={(event) => {
-                setSelectedExample(event.target.value);
-                // Clear selected file when an example is selected
-                setSelectedFile(null);
-              }}
-              onFileChange={handleFileChange}
-            />
-          </Box>
-          <ProcessVisualizer
-            processes={filteredProcesses}
-            title={
-              selectedFile
-                ? selectedFile.name
-                : selectedExample
-                  ? `Example: ${exampleLogs[selectedExample].name}`
-                  : 'Sample Log Visualization'
-            }
-            thresholdToShowProcess={thresholdToShowProcess}
-            timeRange={timeRange}
-            canvasWidth={canvasDimensions.width}
-            canvasHeight={canvasDimensions.height}
-            onHoverProcess={handleHover}
-            hoveredProcess={hoveredProcess}
-            mousePosition={mousePosition}
-          />
-        </>
-      )}
+      <Box sx={{ mt: 4, mb: 2 }}>
+        <LogFileSelector
+          setProcesses={setProcesses}
+          setThresholdToShowProcess={setThresholdToShowProcess}
+          setTimeRange={setTimeRange}
+          isLoading={isLoading}
+          setIsLoading={setIsLoading}
+          setTitle={setTitle}
+        />
+        <ProcessController
+          thresholdToShowProcess={thresholdToShowProcess}
+          setThresholdToShowProcess={setThresholdToShowProcess}
+          timeRange={timeRange}
+          globalTimeRange={globalTimeRange}
+          setTimeRange={setTimeRange}
+          isLoading={isLoading}
+          regexpFilterProcess={regexpFilterProcess}
+          setRegexpFilterProcess={setRegexpFilterProcess}
+        />
+      </Box>
+      <ProcessVisualizer
+        processes={processes}
+        title={title}
+        thresholdToShowProcess={thresholdToShowProcess}
+        timeRange={timeRange}
+        isLoading={isLoading}
+        regexpFilterProcess={regexpFilterProcess}
+      />
     </Box>
   );
 }
