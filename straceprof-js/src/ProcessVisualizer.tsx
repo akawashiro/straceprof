@@ -25,6 +25,20 @@ const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
   timeRange,
   isLoading,
 }) => {
+  // Filter processes based on both threshold and time range
+  const filteredProcesses = useMemo(() => {
+    if (processes.length === 0) return [];
+
+    const minTime = Math.min(...processes.map((p) => p.startTime));
+
+    return processes.filter(
+      (p) =>
+        p.endTime - p.startTime >= thresholdToShowProcess &&
+        p.startTime - minTime <= timeRange[1] &&
+        p.endTime - minTime >= timeRange[0]
+    );
+  }, [processes, thresholdToShowProcess, timeRange]);
+
   // Canvas dimensions state
   const [canvasDimensions, setCanvasDimensions] = useState({
     width: window.innerWidth * 0.9, // Initial width based on window size
@@ -89,15 +103,18 @@ const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
     };
   }, []);
 
-  // Update canvas dimensions when processes or threshold changes
+  // Update canvas dimensions when filtered processes or threshold changes
   useEffect(() => {
-    if (processes.length > 0) {
-      updateCanvasDimensions(processes, thresholdToShowProcess);
+    if (filteredProcesses.length > 0) {
+      updateCanvasDimensions(filteredProcesses, thresholdToShowProcess);
     }
-  }, [processes, thresholdToShowProcess]);
+  }, [filteredProcesses, thresholdToShowProcess]);
 
-  // Generate color map once when processes change
-  const colorMap = useMemo(() => generateColorMap(processes), [processes]);
+  // Generate color map once when filtered processes change
+  const colorMap = useMemo(
+    () => generateColorMap(filteredProcesses),
+    [filteredProcesses]
+  );
 
   // Return nothing when loading
   if (isLoading) {
@@ -106,7 +123,7 @@ const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
 
   return (
     <Container maxWidth={false} sx={{ px: 3 }}>
-      {processes.length === 0 ? (
+      {filteredProcesses.length === 0 ? (
         <Typography variant="body1">
           No processes to display. Try reducing the minimum duration or
           adjusting the time range.
@@ -114,7 +131,7 @@ const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
       ) : (
         <Box sx={{ width: '100%' }}>
           <ProcessCanvas
-            processes={processes}
+            processes={filteredProcesses}
             width={canvasDimensions.width}
             height={canvasDimensions.height}
             title={title}

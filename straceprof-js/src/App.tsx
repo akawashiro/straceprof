@@ -38,20 +38,6 @@ function App() {
     setTimeRange(value);
   };
 
-  // Filter processes based on both threshold and time range
-  const filteredProcesses = useMemo(() => {
-    if (processes.length === 0) return [];
-
-    const minTime = Math.min(...processes.map((p) => p.startTime));
-
-    return processes.filter(
-      (p) =>
-        p.endTime - p.startTime >= thresholdToShowProcess &&
-        p.startTime - minTime <= timeRange[1] &&
-        p.endTime - minTime >= timeRange[0]
-    );
-  }, [processes, thresholdToShowProcess, timeRange]);
-
   return (
     <Box sx={{ width: '100%', height: '100%', textAlign: 'center' }}>
       <Container maxWidth={'lg'}>
@@ -95,7 +81,7 @@ function App() {
         />
       </Box>
       <ProcessVisualizer
-        processes={filteredProcesses}
+        processes={processes}
         title={title}
         thresholdToShowProcess={thresholdToShowProcess}
         timeRange={timeRange}
