@@ -4,7 +4,6 @@ import {
   Process,
   getProcessesFromLog,
   calculateThresholdToShowProcess,
-  calculateProcessVcpuAllocation,
 } from './ProcessUtils';
 import ProcessVisualizer from './ProcessVisualizer';
 import ProcessController from './ProcessController';
@@ -23,17 +22,6 @@ function App() {
   const [thresholdToShowProcess, setThresholdToShowProcess] =
     useState<number>(0);
   const [timeRange, setTimeRange] = useState<[number, number]>([0, 0]);
-  const [canvasDimensions, setCanvasDimensions] = useState({
-    width: window.innerWidth * 0.9, // Initial width based on window size
-    height: 800, // Initial height, will be auto-adjusted based on processes
-  });
-
-  // State for hover functionality
-  const [hoveredProcess, setHoveredProcess] = useState<Process | null>(null);
-  const [mousePosition, setMousePosition] = useState<{
-    x: number;
-    y: number;
-  } | null>(null);
 
   // Calculate global time range from all processes
   const globalTimeRange = useMemo(() => {
@@ -80,9 +68,6 @@ function App() {
           // Use relative time range
           setTimeRange([0, maxTime - minTime]);
         }
-
-        // Set initial canvas dimensions based on window size and processes
-        updateCanvasDimensions(parsedProcesses, calculatedThreshold);
       })
       .catch((error) => {
         console.error('Error fetching example log:', error);
@@ -91,48 +76,6 @@ function App() {
         setIsLoading(false);
       });
   }, [selectedExample, selectedFile]);
-
-  // Add window resize event listener
-  useEffect(() => {
-    const handleResize = () => {
-      setCanvasDimensions((prev) => ({
-        ...prev,
-        width: window.innerWidth * 0.9, // 90% of window width
-      }));
-    };
-
-    // Add event listener
-    window.addEventListener('resize', handleResize);
-
-    // Clean up
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, []);
-
-  // Update canvas dimensions based on processes and threshold
-  const updateCanvasDimensions = (procs: Process[], threshold: number) => {
-    // Set width to 90% of window width, with min/max constraints
-    const windowWidth = window.innerWidth;
-    const responsiveWidth = windowWidth * 0.9 + 1000;
-
-    // Use calculateProcessVcpuAllocation to determine how many vCPU rows we need
-    const processToVcpu = calculateProcessVcpuAllocation(procs, threshold);
-    const maxVcpu =
-      processToVcpu.length > 0 ? Math.max(...processToVcpu) + 1 : 0;
-
-    // Calculate height based on number of vCPUs (30px per row + 30px for title/axis)
-    const PROCESS_ROW_HEIGHT = 32;
-    const calculatedHeight = maxVcpu * PROCESS_ROW_HEIGHT + 50;
-
-    // Set minimum height of 200px
-    const initialHeight = Math.max(calculatedHeight, 200);
-
-    setCanvasDimensions({
-      width: responsiveWidth,
-      height: initialHeight,
-    });
-  };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] || null;
@@ -169,9 +112,6 @@ function App() {
             // Use relative time range
             setTimeRange([0, maxTime - minTime]);
           }
-
-          // Set initial canvas dimensions
-          updateCanvasDimensions(parsedProcesses, calculatedThreshold);
         } catch (error) {
           console.error('Error parsing strace log:', error);
         } finally {
@@ -192,21 +132,11 @@ function App() {
   // Handle process controller changes
   const handleThresholdChange = (value: number) => {
     setThresholdToShowProcess(value);
-    updateCanvasDimensions(processes, value);
   };
 
   // Handle time range changes
   const handleTimeRangeChange = (value: [number, number]) => {
     setTimeRange(value);
-  };
-
-  // Handle hover events from ProcessCanvas
-  const handleHover = (
-    process: Process | null,
-    position: { x: number; y: number } | null
-  ) => {
-    setHoveredProcess(process);
-    setMousePosition(position);
   };
 
   // Filter processes based on both threshold and time range
@@ -282,11 +212,6 @@ function App() {
             }
             thresholdToShowProcess={thresholdToShowProcess}
             timeRange={timeRange}
-            canvasWidth={canvasDimensions.width}
-            canvasHeight={canvasDimensions.height}
-            onHoverProcess={handleHover}
-            hoveredProcess={hoveredProcess}
-            mousePosition={mousePosition}
           />
         </>
       )}
