@@ -7,8 +7,8 @@ import {
 } from './ProcessUtils';
 import ProcessVisualizer from './ProcessVisualizer';
 import ProcessController from './ProcessController';
+import LogFileSelector from './LogFileSelector';
 import { exampleLogs } from './LogExamples';
-import NoProcessesFound from './NoProcessesFound';
 import { fetchLog } from './LogUtils';
 
 function App() {
@@ -179,19 +179,10 @@ function App() {
         </Box>
       )}
 
-      {!isLoading && fileContent && processes.length === 0 && (
-        <NoProcessesFound fileContent={fileContent} />
-      )}
-
       {!isLoading && processes.length > 0 && (
         <>
           <Box sx={{ mt: 4, mb: 2 }}>
-            <ProcessController
-              thresholdToShowProcess={thresholdToShowProcess}
-              onThresholdChange={handleThresholdChange}
-              timeRange={timeRange}
-              globalTimeRange={globalTimeRange}
-              onTimeRangeChange={handleTimeRangeChange}
+            <LogFileSelector
               selectedExample={selectedExample}
               onExampleChange={(event) => {
                 setSelectedExample(event.target.value);
@@ -199,6 +190,13 @@ function App() {
                 setSelectedFile(null);
               }}
               onFileChange={handleFileChange}
+            />
+            <ProcessController
+              thresholdToShowProcess={thresholdToShowProcess}
+              onThresholdChange={handleThresholdChange}
+              timeRange={timeRange}
+              globalTimeRange={globalTimeRange}
+              onTimeRangeChange={handleTimeRangeChange}
             />
           </Box>
           <ProcessVisualizer
