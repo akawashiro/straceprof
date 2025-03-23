@@ -7,7 +7,7 @@ import {
   MenuItem,
   SelectChangeEvent,
   Button,
-  Container
+  Container,
 } from '@mui/material';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
@@ -17,6 +17,7 @@ interface LogFileSelectorProps {
   selectedExample: string;
   onExampleChange: (event: SelectChangeEvent<string>) => void;
   onFileChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  isLoading: boolean;
 }
 
 const copyCommandToClipBoard = () => {
@@ -32,6 +33,7 @@ const LogFileSelector: React.FC<LogFileSelectorProps> = ({
   selectedExample,
   onExampleChange,
   onFileChange,
+  isLoading,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -63,6 +65,7 @@ const LogFileSelector: React.FC<LogFileSelectorProps> = ({
             variant="contained"
             startIcon={<UploadFileIcon />}
             onClick={handleUploadClick}
+            disabled={isLoading}
           >
             Upload log
           </Button>
@@ -75,6 +78,7 @@ const LogFileSelector: React.FC<LogFileSelectorProps> = ({
               value={selectedExample}
               onChange={onExampleChange}
               label="Load a sample log"
+              disabled={isLoading}
               MenuProps={{
                 PaperProps: {
                   style: {
@@ -92,7 +96,7 @@ const LogFileSelector: React.FC<LogFileSelectorProps> = ({
           </FormControl>
         </Grid2>
       </Grid2>
-      </Container>
+    </Container>
   );
 };
 

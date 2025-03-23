@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Box, Typography, CircularProgress, Container } from '@mui/material';
+import { Box, Typography, Container } from '@mui/material';
 import {
   Process,
   getProcessesFromLog,
@@ -173,13 +173,7 @@ function App() {
         </Typography>
       </Container>
 
-      {isLoading && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-          <CircularProgress />
-        </Box>
-      )}
-
-      {!isLoading && processes.length > 0 && (
+      {processes.length > 0 && (
         <>
           <Box sx={{ mt: 4, mb: 2 }}>
             <LogFileSelector
@@ -190,6 +184,7 @@ function App() {
                 setSelectedFile(null);
               }}
               onFileChange={handleFileChange}
+              isLoading={isLoading}
             />
             <ProcessController
               thresholdToShowProcess={thresholdToShowProcess}
@@ -197,6 +192,7 @@ function App() {
               timeRange={timeRange}
               globalTimeRange={globalTimeRange}
               onTimeRangeChange={handleTimeRangeChange}
+              isLoading={isLoading}
             />
           </Box>
           <ProcessVisualizer
@@ -210,6 +206,7 @@ function App() {
             }
             thresholdToShowProcess={thresholdToShowProcess}
             timeRange={timeRange}
+            isLoading={isLoading}
           />
         </>
       )}

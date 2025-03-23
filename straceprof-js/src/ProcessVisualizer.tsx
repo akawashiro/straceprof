@@ -12,6 +12,7 @@ interface ProcessVisualizerProps {
   title?: string;
   thresholdToShowProcess: number;
   timeRange: [number, number];
+  isLoading: boolean;
 }
 
 /**
@@ -22,7 +23,12 @@ const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
   title = 'Process Visualization',
   thresholdToShowProcess,
   timeRange,
+  isLoading,
 }) => {
+  // Return nothing when loading
+  if (isLoading) {
+    return null;
+  }
   // Canvas dimensions state
   const [canvasDimensions, setCanvasDimensions] = useState({
     width: window.innerWidth * 0.9, // Initial width based on window size
