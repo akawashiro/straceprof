@@ -64,11 +64,13 @@ The web interface allows you to:
 ### Using the Interface
 
 1. **Getting Started**:
+
    - Click the "Upload File" button to upload a strace log file
    - Or select a sample log from the dropdown menu
    - Use the "Copy the command line snippet" button to copy the strace command to your clipboard
 
 2. **Visualization Controls**:
+
    - **Threshold to show processes**: Filter out processes shorter than the specified duration
    - **Time range to visualize**: Focus on a specific time window of the execution
    - **Filter processes by regexp**: Enter a regular expression to filter processes by command name
