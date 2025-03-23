@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useMemo } from 'react';
 import {
   Grid2,
   FormControl,
@@ -10,6 +10,11 @@ import {
   Container,
 } from '@mui/material';
 import { fetchLog } from './LogUtils';
+import {
+  Process,
+  getProcessesFromLog,
+  calculateThresholdToShowProcess,
+} from './ProcessUtils';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { exampleLogs } from './LogExamples';
@@ -17,7 +22,9 @@ import { exampleLogs } from './LogExamples';
 interface LogFileSelectorProps {
   selectedExample: string;
   onExampleChange: (event: SelectChangeEvent<string>) => void;
-  onFileContentChange: (content: string) => void;
+  onProcessesChange: (processes: Process[]) => void;
+  onThresholdCalculated: (threshold: number) => void;
+  onTimeRangeCalculated: (timeRange: [number, number]) => void;
   isLoading: boolean;
   setIsLoading: (loading: boolean) => void;
   setTitle: (title: string) => void;
@@ -35,13 +42,16 @@ const copyCommandToClipBoard = () => {
 const LogFileSelector: React.FC<LogFileSelectorProps> = ({
   selectedExample,
   onExampleChange,
-  onFileContentChange,
+  onProcessesChange,
+  onThresholdCalculated,
+  onTimeRangeCalculated,
   isLoading,
   setIsLoading,
   setTitle,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [fileContent, setFileContent] = useState<string>('');
 
   const handleUploadClick = () => {
     fileInputRef.current?.click();
@@ -61,7 +71,7 @@ const LogFileSelector: React.FC<LogFileSelectorProps> = ({
       const reader = new FileReader();
       reader.onload = (e) => {
         const content = e.target?.result as string;
-        onFileContentChange(content);
+        setFileContent(content);
         setIsLoading(false);
       };
 
@@ -74,7 +84,7 @@ const LogFileSelector: React.FC<LogFileSelectorProps> = ({
     }
   };
 
-  // Fetch and parse logs when selected example changes
+  // Fetch logs when selected example changes
   useEffect(() => {
     if (selectedFile) {
       // If a file is uploaded, don't use example logs
@@ -83,7 +93,7 @@ const LogFileSelector: React.FC<LogFileSelectorProps> = ({
 
     if (!selectedExample) {
       // No example selected, clear content
-      onFileContentChange('');
+      setFileContent('');
       setTitle('Sample Log Visualization');
       return;
     }
@@ -92,7 +102,7 @@ const LogFileSelector: React.FC<LogFileSelectorProps> = ({
     setIsLoading(true);
     fetchLog(exampleLogs[selectedExample].path)
       .then((logContent) => {
-        onFileContentChange(logContent);
+        setFileContent(logContent);
         setTitle(`Example: ${exampleLogs[selectedExample].name}`);
       })
       .catch((error) => {
@@ -101,12 +111,41 @@ const LogFileSelector: React.FC<LogFileSelectorProps> = ({
       .finally(() => {
         setIsLoading(false);
       });
+  }, [selectedExample, selectedFile, setIsLoading, setTitle]);
+
+  // Process file content when it changes
+  useEffect(() => {
+    if (!fileContent) {
+      // No content, clear processes
+      onProcessesChange([]);
+      return;
+    }
+
+    // Parse the strace log
+    try {
+      const parsedProcesses = getProcessesFromLog(fileContent);
+      onProcessesChange(parsedProcesses);
+
+      // Calculate and set the initial threshold
+      const calculatedThreshold =
+        calculateThresholdToShowProcess(parsedProcesses);
+      onThresholdCalculated(calculatedThreshold);
+
+      // Calculate and set the initial time range
+      if (parsedProcesses.length > 0) {
+        const minTime = Math.min(...parsedProcesses.map((p) => p.startTime));
+        const maxTime = Math.max(...parsedProcesses.map((p) => p.endTime));
+        // Use relative time range
+        onTimeRangeCalculated([0, maxTime - minTime]);
+      }
+    } catch (error) {
+      console.error('Error parsing strace log:', error);
+    }
   }, [
-    selectedExample,
-    selectedFile,
-    onFileContentChange,
-    setIsLoading,
-    setTitle,
+    fileContent,
+    onProcessesChange,
+    onThresholdCalculated,
+    onTimeRangeCalculated,
   ]);
 
   return (

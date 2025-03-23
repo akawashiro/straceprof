@@ -1,17 +1,12 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { Box, Typography, Container } from '@mui/material';
-import {
-  Process,
-  getProcessesFromLog,
-  calculateThresholdToShowProcess,
-} from './ProcessUtils';
+import { Process } from './ProcessUtils';
 import ProcessVisualizer from './ProcessVisualizer';
 import ProcessController from './ProcessController';
 import LogFileSelector from './LogFileSelector';
 // Removed unused imports
 
 function App() {
-  const [fileContent, setFileContent] = useState<string>('');
   const [processes, setProcesses] = useState<Process[]>([]);
   const [selectedExample, setSelectedExample] = useState<string>('npm_install');
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -32,36 +27,6 @@ function App() {
     // Use relative time: [0, maxTime - minTime] instead of [minTime, maxTime]
     return [0, maxTime - minTime] as [number, number];
   }, [processes]);
-
-  // Process file content when it changes
-  useEffect(() => {
-    if (!fileContent) {
-      // No content, clear processes
-      setProcesses([]);
-      return;
-    }
-
-    // Parse the strace log
-    try {
-      const parsedProcesses = getProcessesFromLog(fileContent);
-      setProcesses(parsedProcesses);
-
-      // Calculate and set the initial threshold
-      const calculatedThreshold =
-        calculateThresholdToShowProcess(parsedProcesses);
-      setThresholdToShowProcess(calculatedThreshold);
-
-      // Calculate and set the initial time range
-      if (parsedProcesses.length > 0) {
-        const minTime = Math.min(...parsedProcesses.map((p) => p.startTime));
-        const maxTime = Math.max(...parsedProcesses.map((p) => p.endTime));
-        // Use relative time range
-        setTimeRange([0, maxTime - minTime]);
-      }
-    } catch (error) {
-      console.error('Error parsing strace log:', error);
-    }
-  }, [fileContent]);
 
   // Handle process controller changes
   const handleThresholdChange = (value: number) => {
@@ -113,7 +78,9 @@ function App() {
           onExampleChange={(event) => {
             setSelectedExample(event.target.value);
           }}
-          onFileContentChange={setFileContent}
+          onProcessesChange={setProcesses}
+          onThresholdCalculated={setThresholdToShowProcess}
+          onTimeRangeCalculated={setTimeRange}
           isLoading={isLoading}
           setIsLoading={setIsLoading}
           setTitle={setTitle}
