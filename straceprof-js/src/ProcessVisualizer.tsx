@@ -25,10 +25,6 @@ const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
   timeRange,
   isLoading,
 }) => {
-  // Return nothing when loading
-  if (isLoading) {
-    return null;
-  }
   // Canvas dimensions state
   const [canvasDimensions, setCanvasDimensions] = useState({
     width: window.innerWidth * 0.9, // Initial width based on window size
@@ -41,24 +37,6 @@ const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
     x: number;
     y: number;
   } | null>(null);
-
-  // Add window resize event listener
-  useEffect(() => {
-    const handleResize = () => {
-      setCanvasDimensions((prev) => ({
-        ...prev,
-        width: window.innerWidth * 0.9, // 90% of window width
-      }));
-    };
-
-    // Add event listener
-    window.addEventListener('resize', handleResize);
-
-    // Clean up
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, []);
 
   // Update canvas dimensions based on processes and threshold
   const updateCanvasDimensions = (procs: Process[], threshold: number) => {
@@ -93,14 +71,38 @@ const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
     setMousePosition(position);
   };
 
+  // Add window resize event listener
+  useEffect(() => {
+    const handleResize = () => {
+      setCanvasDimensions((prev) => ({
+        ...prev,
+        width: window.innerWidth * 0.9, // 90% of window width
+      }));
+    };
+
+    // Add event listener
+    window.addEventListener('resize', handleResize);
+
+    // Clean up
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
   // Update canvas dimensions when processes or threshold changes
   useEffect(() => {
     if (processes.length > 0) {
       updateCanvasDimensions(processes, thresholdToShowProcess);
     }
   }, [processes, thresholdToShowProcess]);
+
   // Generate color map once when processes change
   const colorMap = useMemo(() => generateColorMap(processes), [processes]);
+
+  // Return nothing when loading
+  if (isLoading) {
+    return null;
+  }
 
   return (
     <Container maxWidth={false} sx={{ px: 3 }}>

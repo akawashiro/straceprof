@@ -8,8 +8,7 @@ import {
 import ProcessVisualizer from './ProcessVisualizer';
 import ProcessController from './ProcessController';
 import LogFileSelector from './LogFileSelector';
-import { exampleLogs } from './LogExamples';
-import { fetchLog } from './LogUtils';
+// Removed unused imports
 
 function App() {
   const [fileContent, setFileContent] = useState<string>('');
