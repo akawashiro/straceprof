@@ -20,8 +20,6 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { exampleLogs } from './LogExamples';
 
 interface LogFileSelectorProps {
-  selectedExample: string;
-  onExampleChange: (event: SelectChangeEvent<string>) => void;
   onProcessesChange: (processes: Process[]) => void;
   onThresholdCalculated: (threshold: number) => void;
   onTimeRangeCalculated: (timeRange: [number, number]) => void;
@@ -40,8 +38,6 @@ const copyCommandToClipBoard = () => {
  * LogFileSelector component for selecting log files to visualize
  */
 const LogFileSelector: React.FC<LogFileSelectorProps> = ({
-  selectedExample,
-  onExampleChange,
   onProcessesChange,
   onThresholdCalculated,
   onTimeRangeCalculated,
@@ -49,6 +45,11 @@ const LogFileSelector: React.FC<LogFileSelectorProps> = ({
   setIsLoading,
   setTitle,
 }) => {
+  const [selectedExample, setSelectedExample] = useState<string>('npm_install');
+
+  const handleExampleChange = (event: SelectChangeEvent<string>) => {
+    setSelectedExample(event.target.value);
+  };
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [fileContent, setFileContent] = useState<string>('');
@@ -183,7 +184,7 @@ const LogFileSelector: React.FC<LogFileSelectorProps> = ({
             <Select
               labelId="example-select-label"
               value={selectedExample}
-              onChange={onExampleChange}
+              onChange={handleExampleChange}
               label="Load a sample log"
               disabled={isLoading}
               MenuProps={{

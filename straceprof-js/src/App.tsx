@@ -8,7 +8,6 @@ import LogFileSelector from './LogFileSelector';
 
 function App() {
   const [processes, setProcesses] = useState<Process[]>([]);
-  const [selectedExample, setSelectedExample] = useState<string>('npm_install');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [title, setTitle] = useState<string>('Sample Log Visualization');
 
@@ -60,10 +59,6 @@ function App() {
 
       <Box sx={{ mt: 4, mb: 2 }}>
         <LogFileSelector
-          selectedExample={selectedExample}
-          onExampleChange={(event) => {
-            setSelectedExample(event.target.value);
-          }}
           onProcessesChange={setProcesses}
           onThresholdCalculated={setThresholdToShowProcess}
           onTimeRangeCalculated={setTimeRange}
