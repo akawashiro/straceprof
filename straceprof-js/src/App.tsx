@@ -173,43 +173,39 @@ function App() {
         </Typography>
       </Container>
 
-      {processes.length > 0 && (
-        <>
-          <Box sx={{ mt: 4, mb: 2 }}>
-            <LogFileSelector
-              selectedExample={selectedExample}
-              onExampleChange={(event) => {
-                setSelectedExample(event.target.value);
-                // Clear selected file when an example is selected
-                setSelectedFile(null);
-              }}
-              onFileChange={handleFileChange}
-              isLoading={isLoading}
-            />
-            <ProcessController
-              thresholdToShowProcess={thresholdToShowProcess}
-              onThresholdChange={handleThresholdChange}
-              timeRange={timeRange}
-              globalTimeRange={globalTimeRange}
-              onTimeRangeChange={handleTimeRangeChange}
-              isLoading={isLoading}
-            />
-          </Box>
-          <ProcessVisualizer
-            processes={filteredProcesses}
-            title={
-              selectedFile
-                ? selectedFile.name
-                : selectedExample
-                  ? `Example: ${exampleLogs[selectedExample].name}`
-                  : 'Sample Log Visualization'
-            }
-            thresholdToShowProcess={thresholdToShowProcess}
-            timeRange={timeRange}
-            isLoading={isLoading}
-          />
-        </>
-      )}
+      <Box sx={{ mt: 4, mb: 2 }}>
+        <LogFileSelector
+          selectedExample={selectedExample}
+          onExampleChange={(event) => {
+            setSelectedExample(event.target.value);
+            // Clear selected file when an example is selected
+            setSelectedFile(null);
+          }}
+          onFileChange={handleFileChange}
+          isLoading={isLoading}
+        />
+        <ProcessController
+          thresholdToShowProcess={thresholdToShowProcess}
+          onThresholdChange={handleThresholdChange}
+          timeRange={timeRange}
+          globalTimeRange={globalTimeRange}
+          onTimeRangeChange={handleTimeRangeChange}
+          isLoading={isLoading}
+        />
+      </Box>
+      <ProcessVisualizer
+        processes={filteredProcesses}
+        title={
+          selectedFile
+            ? selectedFile.name
+            : selectedExample
+              ? `Example: ${exampleLogs[selectedExample].name}`
+              : 'Sample Log Visualization'
+        }
+        thresholdToShowProcess={thresholdToShowProcess}
+        timeRange={timeRange}
+        isLoading={isLoading}
+      />
     </Box>
   );
 }
