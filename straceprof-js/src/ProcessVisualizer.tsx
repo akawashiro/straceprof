@@ -111,10 +111,7 @@ const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
   }, [filteredProcesses, thresholdToShowProcess]);
 
   // Generate color map once when filtered processes change
-  const colorMap = useMemo(
-    () => generateColorMap(filteredProcesses),
-    [filteredProcesses]
-  );
+  const colorMap = useMemo(() => generateColorMap(processes), [processes]);
 
   // Return nothing when loading
   if (isLoading) {

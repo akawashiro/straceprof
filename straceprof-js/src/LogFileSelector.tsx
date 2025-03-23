@@ -20,9 +20,9 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { exampleLogs } from './LogExamples';
 
 interface LogFileSelectorProps {
-  onProcessesChange: (processes: Process[]) => void;
-  onThresholdCalculated: (threshold: number) => void;
-  onTimeRangeCalculated: (timeRange: [number, number]) => void;
+  setProcesses: (processes: Process[]) => void;
+  setThresholdToShowProcess: (threshold: number) => void;
+  setTimeRange: (timeRange: [number, number]) => void;
   isLoading: boolean;
   setIsLoading: (loading: boolean) => void;
   setTitle: (title: string) => void;
@@ -38,9 +38,9 @@ const copyCommandToClipBoard = () => {
  * LogFileSelector component for selecting log files to visualize
  */
 const LogFileSelector: React.FC<LogFileSelectorProps> = ({
-  onProcessesChange,
-  onThresholdCalculated,
-  onTimeRangeCalculated,
+  setProcesses,
+  setThresholdToShowProcess,
+  setTimeRange,
   isLoading,
   setIsLoading,
   setTitle,
@@ -118,36 +118,31 @@ const LogFileSelector: React.FC<LogFileSelectorProps> = ({
   useEffect(() => {
     if (!fileContent) {
       // No content, clear processes
-      onProcessesChange([]);
+      setProcesses([]);
       return;
     }
 
     // Parse the strace log
     try {
       const parsedProcesses = getProcessesFromLog(fileContent);
-      onProcessesChange(parsedProcesses);
+      setProcesses(parsedProcesses);
 
       // Calculate and set the initial threshold
       const calculatedThreshold =
         calculateThresholdToShowProcess(parsedProcesses);
-      onThresholdCalculated(calculatedThreshold);
+      setThresholdToShowProcess(calculatedThreshold);
 
       // Calculate and set the initial time range
       if (parsedProcesses.length > 0) {
         const minTime = Math.min(...parsedProcesses.map((p) => p.startTime));
         const maxTime = Math.max(...parsedProcesses.map((p) => p.endTime));
         // Use relative time range
-        onTimeRangeCalculated([0, maxTime - minTime]);
+        setTimeRange([0, maxTime - minTime]);
       }
     } catch (error) {
       console.error('Error parsing strace log:', error);
     }
-  }, [
-    fileContent,
-    onProcessesChange,
-    onThresholdCalculated,
-    onTimeRangeCalculated,
-  ]);
+  }, [fileContent, setProcesses, setThresholdToShowProcess, setTimeRange]);
 
   return (
     <Container maxWidth="lg">

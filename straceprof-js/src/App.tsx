@@ -43,9 +43,9 @@ function App() {
 
       <Box sx={{ mt: 4, mb: 2 }}>
         <LogFileSelector
-          onProcessesChange={setProcesses}
-          onThresholdCalculated={setThresholdToShowProcess}
-          onTimeRangeCalculated={setTimeRange}
+          setProcesses={setProcesses}
+          setThresholdToShowProcess={setThresholdToShowProcess}
+          setTimeRange={setTimeRange}
           isLoading={isLoading}
           setIsLoading={setIsLoading}
           setTitle={setTitle}
