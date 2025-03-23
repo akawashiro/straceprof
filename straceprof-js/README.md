@@ -6,10 +6,15 @@ A web-based visualization tool for strace logs. This is the JavaScript/web versi
 
 - Upload and parse strace log files
 - Visualize processes in a timeline view
-- View process details in a table format
-- Filter processes by minimum duration
-- Customize visualization dimensions
-- Includes a sample log for demonstration
+- View process details on hover
+- Filter processes by:
+  - Minimum duration threshold
+  - Regular expression pattern matching
+  - Time range selection
+- Color-coded visualization by program name
+- Responsive canvas-based visualization
+- Copy strace command to clipboard with one click
+- Includes sample logs (NPM Install, Linux Build) for demonstration
 
 ## Introduction
 
@@ -17,11 +22,11 @@ A web-based visualization tool for strace logs. This is the JavaScript/web versi
 
 The web interface allows you to:
 
-- Upload strace log files
-- View a table of all processes with their details
-- Visualize the processes in a timeline view
-- Filter processes by minimum duration
-- Customize the visualization dimensions
+- Upload strace log files or select from provided examples
+- Visualize processes in a timeline view with color coding by program type
+- Filter processes using multiple criteria (duration, time range, regexp)
+- Hover over processes to view detailed information
+- Copy the strace command to clipboard for easy profiling
 
 ## Installation
 
@@ -58,14 +63,23 @@ The web interface allows you to:
 
 ### Using the Interface
 
-1. Click the "Upload File" button to upload a strace log file
-2. The application will parse the log file and display:
-   - A table of all processes with their details
-   - A visualization of the processes in a timeline view
-3. You can adjust the visualization settings:
-   - Minimum Duration: Filter out processes shorter than the specified duration
-   - Visualization Width: Adjust the width of the visualization
-   - Visualization Height: Adjust the height of the visualization
+1. **Getting Started**:
+   - Click the "Upload File" button to upload a strace log file
+   - Or select a sample log from the dropdown menu
+   - Use the "Copy the command line snippet" button to copy the strace command to your clipboard
+
+2. **Visualization Controls**:
+   - **Threshold to show processes**: Filter out processes shorter than the specified duration
+   - **Time range to visualize**: Focus on a specific time window of the execution
+   - **Filter processes by regexp**: Enter a regular expression to filter processes by command name
+
+3. **Interacting with the Visualization**:
+   - Hover over process rectangles to see detailed information:
+     - Full command
+     - Process ID (PID)
+     - Duration in seconds
+   - Processes are color-coded by program name for easy identification
+   - Processes are arranged in rows to avoid overlap
 
 ### Generating Strace Logs
 
@@ -92,9 +106,27 @@ straceprof-js parses strace log files to extract information about processes:
 3. It extracts the process ID (PID), start time, end time, program name, and command line
 4. It visualizes the processes in a timeline view, with each process represented as a colored rectangle
 5. The width of each rectangle represents the duration of the process
-6. Processes are arranged vertically to avoid overlap
+6. Processes are arranged vertically to avoid overlap using an efficient allocation algorithm
+7. Colors are assigned to processes based on their program name for easier identification
+
+## Implementation Details
+
+- **Canvas-based Visualization**: Uses HTML5 Canvas for efficient rendering of potentially hundreds of processes
+- **Process Allocation Algorithm**: Efficiently arranges processes in rows to maximize visibility
+- **Responsive Design**: Adjusts to different screen sizes while maintaining usability
+- **Color Mapping**: Assigns consistent colors to program types for easier pattern recognition
+- **Hover Tooltips**: Provides detailed process information on hover
+- **Regular Expression Filtering**: Allows powerful filtering capabilities for complex build processes
 
 ## Development
+
+### Technology Stack
+
+- React 19
+- TypeScript
+- Material UI v6
+- Vite for development and building
+- Jest for testing
 
 ### Available Scripts
 
