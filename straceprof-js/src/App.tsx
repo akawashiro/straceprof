@@ -12,11 +12,11 @@ import { exampleLogs } from './LogExamples';
 import { fetchLog } from './LogUtils';
 
 function App() {
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [fileContent, setFileContent] = useState<string>('');
   const [processes, setProcesses] = useState<Process[]>([]);
   const [selectedExample, setSelectedExample] = useState<string>('npm_install');
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [title, setTitle] = useState<string>('Sample Log Visualization');
 
   // Canvas control state
   const [thresholdToShowProcess, setThresholdToShowProcess] =
@@ -34,100 +34,35 @@ function App() {
     return [0, maxTime - minTime] as [number, number];
   }, [processes]);
 
-  // Fetch and parse logs when selected example changes
+  // Process file content when it changes
   useEffect(() => {
-    if (selectedFile) {
-      // If a file is uploaded, don't use example logs
-      return;
-    }
-
-    if (!selectedExample) {
-      // No example selected, clear processes
+    if (!fileContent) {
+      // No content, clear processes
       setProcesses([]);
-      setFileContent('');
       return;
     }
 
-    // Fetch the selected example log
-    setIsLoading(true);
-    fetchLog(exampleLogs[selectedExample].path)
-      .then((logContent) => {
-        setFileContent(logContent);
-        const parsedProcesses = getProcessesFromLog(logContent);
-        setProcesses(parsedProcesses);
+    // Parse the strace log
+    try {
+      const parsedProcesses = getProcessesFromLog(fileContent);
+      setProcesses(parsedProcesses);
 
-        // Calculate and set the initial threshold
-        const calculatedThreshold =
-          calculateThresholdToShowProcess(parsedProcesses);
-        setThresholdToShowProcess(calculatedThreshold);
+      // Calculate and set the initial threshold
+      const calculatedThreshold =
+        calculateThresholdToShowProcess(parsedProcesses);
+      setThresholdToShowProcess(calculatedThreshold);
 
-        // Calculate and set the initial time range
-        if (parsedProcesses.length > 0) {
-          const minTime = Math.min(...parsedProcesses.map((p) => p.startTime));
-          const maxTime = Math.max(...parsedProcesses.map((p) => p.endTime));
-          // Use relative time range
-          setTimeRange([0, maxTime - minTime]);
-        }
-      })
-      .catch((error) => {
-        console.error('Error fetching example log:', error);
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
-  }, [selectedExample, selectedFile]);
-
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0] || null;
-    setSelectedFile(file);
-
-    if (file) {
-      // Set loading state to true when file is selected
-      setIsLoading(true);
-
-      // Clear selected example when a file is uploaded
-      setSelectedExample('');
-
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const content = e.target?.result as string;
-        setFileContent(content);
-
-        // Parse the strace log
-        try {
-          const parsedProcesses = getProcessesFromLog(content);
-          setProcesses(parsedProcesses);
-
-          // Calculate and set the initial threshold
-          const calculatedThreshold =
-            calculateThresholdToShowProcess(parsedProcesses);
-          setThresholdToShowProcess(calculatedThreshold);
-
-          // Calculate and set the initial time range
-          if (parsedProcesses.length > 0) {
-            const minTime = Math.min(
-              ...parsedProcesses.map((p) => p.startTime)
-            );
-            const maxTime = Math.max(...parsedProcesses.map((p) => p.endTime));
-            // Use relative time range
-            setTimeRange([0, maxTime - minTime]);
-          }
-        } catch (error) {
-          console.error('Error parsing strace log:', error);
-        } finally {
-          // Set loading state to false when processing is complete
-          setIsLoading(false);
-        }
-      };
-
-      reader.onerror = () => {
-        console.error('Error reading file');
-        setIsLoading(false);
-      };
-
-      reader.readAsText(file);
+      // Calculate and set the initial time range
+      if (parsedProcesses.length > 0) {
+        const minTime = Math.min(...parsedProcesses.map((p) => p.startTime));
+        const maxTime = Math.max(...parsedProcesses.map((p) => p.endTime));
+        // Use relative time range
+        setTimeRange([0, maxTime - minTime]);
+      }
+    } catch (error) {
+      console.error('Error parsing strace log:', error);
     }
-  };
+  }, [fileContent]);
 
   // Handle process controller changes
   const handleThresholdChange = (value: number) => {
@@ -178,11 +113,11 @@ function App() {
           selectedExample={selectedExample}
           onExampleChange={(event) => {
             setSelectedExample(event.target.value);
-            // Clear selected file when an example is selected
-            setSelectedFile(null);
           }}
-          onFileChange={handleFileChange}
+          onFileContentChange={setFileContent}
           isLoading={isLoading}
+          setIsLoading={setIsLoading}
+          setTitle={setTitle}
         />
         <ProcessController
           thresholdToShowProcess={thresholdToShowProcess}
@@ -195,13 +130,7 @@ function App() {
       </Box>
       <ProcessVisualizer
         processes={filteredProcesses}
-        title={
-          selectedFile
-            ? selectedFile.name
-            : selectedExample
-              ? `Example: ${exampleLogs[selectedExample].name}`
-              : 'Sample Log Visualization'
-        }
+        title={title}
         thresholdToShowProcess={thresholdToShowProcess}
         timeRange={timeRange}
         isLoading={isLoading}

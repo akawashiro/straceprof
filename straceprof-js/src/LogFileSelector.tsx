@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import {
   Grid2,
   FormControl,
@@ -9,6 +9,7 @@ import {
   Button,
   Container,
 } from '@mui/material';
+import { fetchLog } from './LogUtils';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { exampleLogs } from './LogExamples';
@@ -16,8 +17,10 @@ import { exampleLogs } from './LogExamples';
 interface LogFileSelectorProps {
   selectedExample: string;
   onExampleChange: (event: SelectChangeEvent<string>) => void;
-  onFileChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onFileContentChange: (content: string) => void;
   isLoading: boolean;
+  setIsLoading: (loading: boolean) => void;
+  setTitle: (title: string) => void;
 }
 
 const copyCommandToClipBoard = () => {
@@ -32,21 +35,86 @@ const copyCommandToClipBoard = () => {
 const LogFileSelector: React.FC<LogFileSelectorProps> = ({
   selectedExample,
   onExampleChange,
-  onFileChange,
+  onFileContentChange,
   isLoading,
+  setIsLoading,
+  setTitle,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const handleUploadClick = () => {
     fileInputRef.current?.click();
   };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0] || null;
+    setSelectedFile(file);
+
+    if (file) {
+      // Set loading state to true when file is selected
+      setIsLoading(true);
+
+      // Update the title based on the file name
+      setTitle(file.name);
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const content = e.target?.result as string;
+        onFileContentChange(content);
+        setIsLoading(false);
+      };
+
+      reader.onerror = () => {
+        console.error('Error reading file');
+        setIsLoading(false);
+      };
+
+      reader.readAsText(file);
+    }
+  };
+
+  // Fetch and parse logs when selected example changes
+  useEffect(() => {
+    if (selectedFile) {
+      // If a file is uploaded, don't use example logs
+      return;
+    }
+
+    if (!selectedExample) {
+      // No example selected, clear content
+      onFileContentChange('');
+      setTitle('Sample Log Visualization');
+      return;
+    }
+
+    // Fetch the selected example log
+    setIsLoading(true);
+    fetchLog(exampleLogs[selectedExample].path)
+      .then((logContent) => {
+        onFileContentChange(logContent);
+        setTitle(`Example: ${exampleLogs[selectedExample].name}`);
+      })
+      .catch((error) => {
+        console.error('Error fetching example log:', error);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, [
+    selectedExample,
+    selectedFile,
+    onFileContentChange,
+    setIsLoading,
+    setTitle,
+  ]);
 
   return (
     <Container maxWidth="lg">
       <input
         type="file"
         ref={fileInputRef}
-        onChange={onFileChange}
+        onChange={handleFileChange}
         style={{ display: 'none' }}
       />
 
