@@ -153,8 +153,8 @@ const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
       const maxVcpu =
         processToVcpu.length > 0 ? Math.max(...processToVcpu) + 1 : 0;
 
-      // Calculate height based on number of vCPUs (30px per row + 50px for title/axis)
-      const calculatedHeight = maxVcpu * PROCESS_ROW_HEIGHT + 50;
+      // Calculate height based on number of vCPUs (30px per row + 100px for title/axis)
+      const calculatedHeight = maxVcpu * PROCESS_ROW_HEIGHT + 100;
 
       // Set minimum height of 200px
       const newHeight = Math.max(calculatedHeight, 200);
