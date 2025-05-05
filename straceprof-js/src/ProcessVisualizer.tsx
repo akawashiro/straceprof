@@ -59,14 +59,17 @@ const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
   }
 
   return (
-    <Container maxWidth={false} sx={{ px: 3 }}>
+    <Container
+      maxWidth={false}
+      sx={{ px: 3, display: 'flex', justifyContent: 'center' }}
+    >
       {filteredProcesses.length === 0 ? (
         <Typography variant="body1">
           No processes to display. Try reducing the minimum duration, adjusting
           the time range, or modifying the regexp filter.
         </Typography>
       ) : (
-        <Box sx={{ width: '100%' }}>
+        <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
           <ProcessCanvas
             processes={filteredProcesses}
             title={title}
