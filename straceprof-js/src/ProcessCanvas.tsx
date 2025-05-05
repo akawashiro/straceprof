@@ -398,6 +398,7 @@ const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
             padding: '8px 16px',
             borderRadius: '4px',
             zIndex: 1001,
+            fontFamily: theme.typography.fontFamily,
           }}
         >
           Process information copied to clipboard!
