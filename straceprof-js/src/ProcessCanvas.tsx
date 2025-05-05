@@ -40,6 +40,19 @@ function generateText(
   return text;
 }
 
+/**
+ * Generate filtered processes based on threshold
+ * Returns processes that exceed the threshold duration, sorted by start time
+ */
+function generateFilteredProcesses(
+  processes: Process[],
+  thresholdToShowProcess: number
+): Process[] {
+  return processes
+    .filter((p) => p.endTime - p.startTime >= thresholdToShowProcess)
+    .sort((a, b) => a.startTime - b.startTime);
+}
+
 // Fixed height for each process row, slightly larger than text size
 const PROCESS_ROW_HEIGHT = 30; // For 12px font
 
@@ -67,19 +80,11 @@ const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
   } | null>(null);
   const [hoveredProcess, setHoveredProcess] = useState<Process | null>(null);
 
-
   // State for canvas dimensions
   const [canvasDimensions, setCanvasDimensions] = useState({
     width: window.innerWidth * 0.9, // Initial width based on window size
     height: 800, // Initial height, will be auto-adjusted based on processes
   });
-
-  // Function to generate filtered processes
-  const generateFilteredProcesses = () => {
-    return processes
-      .filter((p) => p.endTime - p.startTime >= thresholdToShowProcess)
-      .sort((a, b) => a.startTime - b.startTime);
-  };
 
   // Function to check if mouse is over a process rectangle
   const checkHover = (x: number, y: number) => {
@@ -135,7 +140,10 @@ const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
 
   // Update canvas dimensions based on processes
   useEffect(() => {
-    const filteredProcesses = generateFilteredProcesses();
+    const filteredProcesses = generateFilteredProcesses(
+      processes,
+      thresholdToShowProcess
+    );
     if (filteredProcesses.length > 0) {
       // Calculate process layout (which vCPU each process runs on)
       const processToVcpu = calculateProcessVcpuAllocation(
@@ -159,7 +167,10 @@ const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
   }, [processes, thresholdToShowProcess]);
 
   useEffect(() => {
-    const filteredProcesses = generateFilteredProcesses();
+    const filteredProcesses = generateFilteredProcesses(
+      processes,
+      thresholdToShowProcess
+    );
     if (!canvasRef.current || filteredProcesses.length === 0) return;
 
     const canvas = canvasRef.current;
