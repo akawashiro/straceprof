@@ -4,8 +4,6 @@ import { Box, useTheme } from '@mui/material';
 
 interface ProcessCanvasProps {
   processes: Process[];
-  width: number;
-  height: number;
   title: string;
   thresholdToShowProcess: number;
   timeRange: [number, number];
@@ -64,8 +62,6 @@ const CANVAS_PADDING = 5;
  */
 const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
   processes,
-  width,
-  height,
   title,
   thresholdToShowProcess,
   timeRange,
@@ -82,10 +78,18 @@ const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
     y: number;
   } | null>(null);
 
-  // Filter processes based on thresholdToShowProcess
-  const filteredProcesses = processes
-    .filter((p) => p.endTime - p.startTime >= thresholdToShowProcess)
-    .sort((a, b) => a.startTime - b.startTime);
+  // State for canvas dimensions
+  const [canvasDimensions, setCanvasDimensions] = useState({
+    width: window.innerWidth * 0.9, // Initial width based on window size
+    height: 800, // Initial height, will be auto-adjusted based on processes
+  });
+
+  // Function to generate filtered processes
+  const generateFilteredProcesses = () => {
+    return processes
+      .filter((p) => p.endTime - p.startTime >= thresholdToShowProcess)
+      .sort((a, b) => a.startTime - b.startTime);
+  };
 
   // Function to check if mouse is over a process rectangle
   const checkHover = (x: number, y: number) => {
@@ -127,7 +131,51 @@ const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
     }
   };
 
+  // Add window resize event listener
   useEffect(() => {
+    const handleResize = () => {
+      setCanvasDimensions((prev) => ({
+        ...prev,
+        width: window.innerWidth * 0.9, // 90% of window width
+      }));
+    };
+
+    // Add event listener
+    window.addEventListener('resize', handleResize);
+
+    // Clean up
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
+  // Update canvas dimensions based on processes
+  useEffect(() => {
+    const filteredProcesses = generateFilteredProcesses();
+    if (filteredProcesses.length > 0) {
+      // Calculate process layout (which vCPU each process runs on)
+      const processToVcpu = calculateProcessVcpuAllocation(
+        processes,
+        thresholdToShowProcess
+      );
+      const maxVcpu =
+        processToVcpu.length > 0 ? Math.max(...processToVcpu) + 1 : 0;
+
+      // Calculate height based on number of vCPUs (30px per row + 50px for title/axis)
+      const calculatedHeight = maxVcpu * PROCESS_ROW_HEIGHT + 50;
+
+      // Set minimum height of 200px
+      const newHeight = Math.max(calculatedHeight, 200);
+
+      setCanvasDimensions((prev) => ({
+        ...prev,
+        height: newHeight,
+      }));
+    }
+  }, [processes, thresholdToShowProcess]);
+
+  useEffect(() => {
+    const filteredProcesses = generateFilteredProcesses();
     if (!canvasRef.current || filteredProcesses.length === 0) return;
 
     const canvas = canvasRef.current;
@@ -135,8 +183,8 @@ const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
     if (!ctx) return;
 
     // Set canvas dimensions
-    canvas.width = width;
-    canvas.height = height;
+    canvas.width = canvasDimensions.width;
+    canvas.height = canvasDimensions.height;
 
     // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -163,7 +211,7 @@ const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
     const requiredHeight = maxVcpu * PROCESS_ROW_HEIGHT + 50; // +50 for title and time axis
 
     // Adjust canvas height if needed
-    if (requiredHeight > height) {
+    if (requiredHeight > canvasDimensions.height) {
       canvas.height = requiredHeight;
     }
 
@@ -261,9 +309,7 @@ const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
     setProcessRects(newProcessRects);
   }, [
     processes,
-    filteredProcesses,
-    width,
-    height,
+    canvasDimensions,
     thresholdToShowProcess,
     timeRange,
     title,
