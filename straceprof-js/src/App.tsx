@@ -1,5 +1,13 @@
 import { useState, useMemo } from 'react';
-import { Box, Typography, Container } from '@mui/material';
+import {
+  Box,
+  Typography,
+  Container,
+  TextField,
+  Button,
+  Tooltip,
+} from '@mui/material';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { Process, calculateGlobalTimeRange } from './ProcessUtils';
 import ProcessVisualizer from './ProcessVisualizer';
 import ProcessController from './ProcessController';
@@ -17,6 +25,21 @@ function App() {
   const [timeRange, setTimeRange] = useState<[number, number]>([0, 0]);
   const [regexpFilterProcess, setRegexpFilterProcess] =
     useState<string>('^.*$');
+  const [copySuccess, setCopySuccess] = useState<boolean>(false);
+
+  const handleCopy = () => {
+    const command =
+      'strace --trace=execve,execveat,exit,exit_group --follow-forks --string-limit=1000 -ttt --output=straceprof.log <command to profile>';
+    navigator.clipboard
+      .writeText(command)
+      .then(() => {
+        setCopySuccess(true);
+        setTimeout(() => setCopySuccess(false), 2000);
+      })
+      .catch((err) => {
+        console.error('Failed to copy: ', err);
+      });
+  };
 
   // Calculate global time range from all processes
   const globalTimeRange = useMemo(() => {
@@ -34,12 +57,33 @@ function App() {
           such as those initiated by make, cmake, shell scripts, or docker
           build. Upload the result of the follwoing command and visualize it.
         </Typography>
-        <code>
-          {' '}
-          strace --trace=execve,execveat,exit,exit_group --follow-forks
-          --string-limit=1000 -ttt --output=straceprof.log &lt;comamnd to
-          profile&gt;{' '}
-        </code>{' '}
+        <Box sx={{ display: 'flex', alignItems: 'center', mt: 2, mb: 2 }}>
+          <TextField
+            fullWidth
+            variant="outlined"
+            size="small"
+            value="strace --trace=execve,execveat,exit,exit_group --follow-forks --string-limit=1000 -ttt --output=straceprof.log <command to profile>"
+            InputProps={{
+              readOnly: true,
+            }}
+          />
+          <Tooltip
+            open={copySuccess}
+            title="Copied to clipboard!"
+            placement="top"
+            onClose={() => setCopySuccess(false)}
+          >
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleCopy}
+              startIcon={<ContentCopyIcon />}
+              sx={{ ml: 1 }}
+            >
+              Copy
+            </Button>
+          </Tooltip>
+        </Box>
       </Container>
 
       <Box sx={{ mt: 4, mb: 2 }}>
