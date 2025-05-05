@@ -313,7 +313,15 @@ const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
   ]);
 
   return (
-    <Box sx={{ position: 'relative', width: '100%', overflowX: 'auto' }}>
+    <Box
+      sx={{
+        position: 'relative',
+        width: '100%',
+        overflowX: 'auto',
+        display: 'flex',
+        justifyContent: 'center', // Center the canvas horizontally
+      }}
+    >
       <canvas
         ref={canvasRef}
         style={{
