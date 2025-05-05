@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Process, calculateProcessVcpuAllocation } from './ProcessUtils';
 import { Box, useTheme } from '@mui/material';
+import { ProcessRect } from './ProcessTooltip';
+import ProcessTooltip from './ProcessTooltip';
 
 interface ProcessCanvasProps {
   processes: Process[];
@@ -8,10 +10,6 @@ interface ProcessCanvasProps {
   thresholdToShowProcess: number;
   timeRange: [number, number];
   colorMap: Record<string, string>;
-  onHover?: (
-    process: Process | null,
-    position: { x: number; y: number } | null
-  ) => void;
 }
 
 /**
@@ -42,13 +40,17 @@ function generateText(
   return text;
 }
 
-// Interface for storing rectangle information for hover detection
-interface ProcessRect {
-  process: Process;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
+/**
+ * Generate filtered processes based on threshold
+ * Returns processes that exceed the threshold duration, sorted by start time
+ */
+function generateFilteredProcesses(
+  processes: Process[],
+  thresholdToShowProcess: number
+): Process[] {
+  return processes
+    .filter((p) => p.endTime - p.startTime >= thresholdToShowProcess)
+    .sort((a, b) => a.startTime - b.startTime);
 }
 
 // Fixed height for each process row, slightly larger than text size
@@ -66,7 +68,6 @@ const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
   thresholdToShowProcess,
   timeRange,
   colorMap,
-  onHover,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const theme = useTheme();
@@ -77,19 +78,13 @@ const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
     x: number;
     y: number;
   } | null>(null);
+  const [hoveredProcess, setHoveredProcess] = useState<Process | null>(null);
 
   // State for canvas dimensions
   const [canvasDimensions, setCanvasDimensions] = useState({
     width: window.innerWidth * 0.9, // Initial width based on window size
     height: 800, // Initial height, will be auto-adjusted based on processes
   });
-
-  // Function to generate filtered processes
-  const generateFilteredProcesses = () => {
-    return processes
-      .filter((p) => p.endTime - p.startTime >= thresholdToShowProcess)
-      .sort((a, b) => a.startTime - b.startTime);
-  };
 
   // Function to check if mouse is over a process rectangle
   const checkHover = (x: number, y: number) => {
@@ -100,15 +95,11 @@ const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
         y >= rect.y &&
         y <= rect.y + rect.height
       ) {
-        if (onHover) {
-          onHover(rect.process, mousePosition);
-        }
+        setHoveredProcess(rect.process);
         return;
       }
     }
-    if (onHover) {
-      onHover(null, null);
-    }
+    setHoveredProcess(null);
   };
 
   // Mouse event handlers
@@ -126,9 +117,7 @@ const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
 
   const handleMouseLeave = () => {
     setMousePosition(null);
-    if (onHover) {
-      onHover(null, null);
-    }
+    setHoveredProcess(null);
   };
 
   // Add window resize event listener
@@ -151,7 +140,10 @@ const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
 
   // Update canvas dimensions based on processes
   useEffect(() => {
-    const filteredProcesses = generateFilteredProcesses();
+    const filteredProcesses = generateFilteredProcesses(
+      processes,
+      thresholdToShowProcess
+    );
     if (filteredProcesses.length > 0) {
       // Calculate process layout (which vCPU each process runs on)
       const processToVcpu = calculateProcessVcpuAllocation(
@@ -175,7 +167,10 @@ const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
   }, [processes, thresholdToShowProcess]);
 
   useEffect(() => {
-    const filteredProcesses = generateFilteredProcesses();
+    const filteredProcesses = generateFilteredProcesses(
+      processes,
+      thresholdToShowProcess
+    );
     if (!canvasRef.current || filteredProcesses.length === 0) return;
 
     const canvas = canvasRef.current;
@@ -330,6 +325,10 @@ const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
         }}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
+      />
+      <ProcessTooltip
+        hoveredProcess={hoveredProcess}
+        mousePosition={mousePosition}
       />
     </Box>
   );
