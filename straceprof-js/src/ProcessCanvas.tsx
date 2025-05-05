@@ -72,13 +72,14 @@ const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const theme = useTheme();
 
-  // State for hover detection
+  // State for hover detection and copy feedback
   const [processRects, setProcessRects] = useState<ProcessRect[]>([]);
   const [mousePosition, setMousePosition] = useState<{
     x: number;
     y: number;
   } | null>(null);
   const [hoveredProcess, setHoveredProcess] = useState<Process | null>(null);
+  const [copiedFeedback, setCopiedFeedback] = useState<boolean>(false);
 
   // State for canvas dimensions
   const [canvasDimensions, setCanvasDimensions] = useState({
@@ -118,6 +119,52 @@ const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
   const handleMouseLeave = () => {
     setMousePosition(null);
     setHoveredProcess(null);
+  };
+
+  // Handle click on process rectangle to copy information
+  const handleClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (!canvasRef.current) return;
+
+    const canvas = canvasRef.current;
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    // Check if a process rectangle was clicked
+    for (const processRect of processRects) {
+      if (
+        x >= processRect.x &&
+        x <= processRect.x + processRect.width &&
+        y >= processRect.y &&
+        y <= processRect.y + processRect.height
+      ) {
+        const process = processRect.process;
+
+        // Format the text to copy
+        const textToCopy =
+          `Command: ${process.fullCommand}\n` +
+          `PID: ${process.pid}\n` +
+          `Duration: ${Math.round(process.endTime - process.startTime)} sec`;
+
+        // Copy to clipboard
+        navigator.clipboard
+          .writeText(textToCopy)
+          .then(() => {
+            // Show copy feedback
+            setCopiedFeedback(true);
+
+            // Hide feedback after 2 seconds
+            setTimeout(() => {
+              setCopiedFeedback(false);
+            }, 2000);
+          })
+          .catch((err) => {
+            console.error('Failed to copy text: ', err);
+          });
+
+        break;
+      }
+    }
   };
 
   // Add window resize event listener
@@ -330,14 +377,32 @@ const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
           maxWidth: '100%',
           height: 'auto',
           display: 'block', // Prevents extra space below canvas
+          cursor: hoveredProcess ? 'pointer' : 'default', // Change cursor when hovering over a process
         }}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
+        onClick={handleClick}
       />
       <ProcessTooltip
         hoveredProcess={hoveredProcess}
         mousePosition={mousePosition}
       />
+      {copiedFeedback && (
+        <div
+          style={{
+            position: 'fixed',
+            top: '20px',
+            right: '20px',
+            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            color: 'white',
+            padding: '8px 16px',
+            borderRadius: '4px',
+            zIndex: 1001,
+          }}
+        >
+          Process information copied to clipboard!
+        </div>
+      )}
     </Box>
   );
 };
