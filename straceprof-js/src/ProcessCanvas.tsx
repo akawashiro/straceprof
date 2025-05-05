@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Process, calculateProcessVcpuAllocation } from './ProcessUtils';
-import { Box, useTheme } from '@mui/material';
+import { Box, useTheme, Typography } from '@mui/material';
 
 interface ProcessCanvasProps {
   processes: Process[];
@@ -8,10 +8,6 @@ interface ProcessCanvasProps {
   thresholdToShowProcess: number;
   timeRange: [number, number];
   colorMap: Record<string, string>;
-  onHover?: (
-    process: Process | null,
-    position: { x: number; y: number } | null
-  ) => void;
 }
 
 /**
@@ -66,7 +62,6 @@ const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
   thresholdToShowProcess,
   timeRange,
   colorMap,
-  onHover,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const theme = useTheme();
@@ -77,6 +72,64 @@ const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
     x: number;
     y: number;
   } | null>(null);
+  const [hoveredProcess, setHoveredProcess] = useState<Process | null>(null);
+
+  // Ref for tooltip to measure its dimensions
+  const tooltipRef = useRef<HTMLDivElement>(null);
+  // State to store tooltip dimensions
+  const [tooltipDimensions, setTooltipDimensions] = useState({
+    width: 0,
+    height: 0,
+  });
+
+  // Update tooltip dimensions when it changes
+  useEffect(() => {
+    if (tooltipRef.current && hoveredProcess) {
+      const { width, height } = tooltipRef.current.getBoundingClientRect();
+      setTooltipDimensions({ width, height });
+    }
+  }, [hoveredProcess]);
+
+  // Function to calculate tooltip position to ensure it stays within the window
+  const calculateTooltipPosition = (
+    mousePos: { x: number; y: number },
+    tooltipDims: { width: number; height: number }
+  ) => {
+    // Default offset
+    const offset = 10;
+
+    // Get window dimensions
+    const windowWidth = window.innerWidth;
+    const windowHeight = window.innerHeight;
+
+    // Calculate positions
+    let top = mousePos.y + offset;
+    let left = mousePos.x + offset;
+
+    // Check if tooltip would go beyond the right edge
+    if (left + tooltipDims.width > windowWidth) {
+      // Position to the left of the cursor instead
+      left = mousePos.x - tooltipDims.width - offset;
+    }
+
+    // Check if tooltip would go beyond the bottom edge
+    if (top + tooltipDims.height > windowHeight) {
+      // Position above the cursor instead
+      top = mousePos.y - tooltipDims.height - offset;
+    }
+
+    // Ensure tooltip doesn't go beyond the left edge
+    if (left < 0) {
+      left = offset;
+    }
+
+    // Ensure tooltip doesn't go beyond the top edge
+    if (top < 0) {
+      top = offset;
+    }
+
+    return { top, left };
+  };
 
   // State for canvas dimensions
   const [canvasDimensions, setCanvasDimensions] = useState({
@@ -100,15 +153,11 @@ const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
         y >= rect.y &&
         y <= rect.y + rect.height
       ) {
-        if (onHover) {
-          onHover(rect.process, mousePosition);
-        }
+        setHoveredProcess(rect.process);
         return;
       }
     }
-    if (onHover) {
-      onHover(null, null);
-    }
+    setHoveredProcess(null);
   };
 
   // Mouse event handlers
@@ -126,9 +175,7 @@ const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
 
   const handleMouseLeave = () => {
     setMousePosition(null);
-    if (onHover) {
-      onHover(null, null);
-    }
+    setHoveredProcess(null);
   };
 
   // Add window resize event listener
@@ -331,6 +378,33 @@ const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
       />
+      {hoveredProcess && mousePosition && (
+        <div
+          ref={tooltipRef}
+          style={{
+            position: 'fixed',
+            top: calculateTooltipPosition(mousePosition, tooltipDimensions).top,
+            left: calculateTooltipPosition(mousePosition, tooltipDimensions)
+              .left,
+            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            color: 'white',
+            padding: '8px',
+            borderRadius: '4px',
+            maxWidth: '400px',
+            zIndex: 1000,
+            pointerEvents: 'none',
+          }}
+        >
+          <Typography variant="body2" sx={{ wordBreak: 'break-word' }}>
+            Command: {hoveredProcess.fullCommand}
+          </Typography>
+          <Typography variant="body2">PID: {hoveredProcess.pid}</Typography>
+          <Typography variant="body2">
+            Duration:{' '}
+            {Math.round(hoveredProcess.endTime - hoveredProcess.startTime)} sec
+          </Typography>
+        </div>
+      )}
     </Box>
   );
 };
