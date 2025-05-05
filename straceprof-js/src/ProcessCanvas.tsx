@@ -84,10 +84,12 @@ const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
     height: 800, // Initial height, will be auto-adjusted based on processes
   });
 
-  // Filter processes based on thresholdToShowProcess
-  const filteredProcesses = processes
-    .filter((p) => p.endTime - p.startTime >= thresholdToShowProcess)
-    .sort((a, b) => a.startTime - b.startTime);
+  // Function to generate filtered processes
+  const generateFilteredProcesses = () => {
+    return processes
+      .filter((p) => p.endTime - p.startTime >= thresholdToShowProcess)
+      .sort((a, b) => a.startTime - b.startTime);
+  };
 
   // Function to check if mouse is over a process rectangle
   const checkHover = (x: number, y: number) => {
@@ -149,6 +151,7 @@ const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
 
   // Update canvas dimensions based on processes
   useEffect(() => {
+    const filteredProcesses = generateFilteredProcesses();
     if (filteredProcesses.length > 0) {
       // Calculate process layout (which vCPU each process runs on)
       const processToVcpu = calculateProcessVcpuAllocation(
@@ -169,9 +172,10 @@ const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
         height: newHeight,
       }));
     }
-  }, [filteredProcesses, processes, thresholdToShowProcess]);
+  }, [processes, thresholdToShowProcess]);
 
   useEffect(() => {
+    const filteredProcesses = generateFilteredProcesses();
     if (!canvasRef.current || filteredProcesses.length === 0) return;
 
     const canvas = canvasRef.current;
@@ -305,7 +309,6 @@ const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
     setProcessRects(newProcessRects);
   }, [
     processes,
-    filteredProcesses,
     canvasDimensions,
     thresholdToShowProcess,
     timeRange,
