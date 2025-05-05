@@ -16,7 +16,6 @@ import {
   calculateThresholdToShowProcess,
 } from './ProcessUtils';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { exampleLogs } from './LogExamples';
 
 interface LogFileSelectorProps {
@@ -27,12 +26,6 @@ interface LogFileSelectorProps {
   setIsLoading: (loading: boolean) => void;
   setTitle: (title: string) => void;
 }
-
-const copyCommandToClipBoard = () => {
-  navigator.clipboard.writeText(
-    'strace --trace=execve,execveat,exit,exit_group --follow-forks --string-limit=1000 -ttt --output=straceprof.log <comamnd to profile>'
-  );
-};
 
 /**
  * LogFileSelector component for selecting log files to visualize
@@ -157,15 +150,6 @@ const LogFileSelector: React.FC<LogFileSelectorProps> = ({
         <Grid2 size={6}>
           <Button
             variant="contained"
-            startIcon={<ContentCopyIcon />}
-            onClick={copyCommandToClipBoard}
-          >
-            Copy the command line snippet to take a profile log
-          </Button>
-        </Grid2>
-        <Grid2 size={3}>
-          <Button
-            variant="contained"
             startIcon={<UploadFileIcon />}
             onClick={handleUploadClick}
             disabled={isLoading}
@@ -173,7 +157,7 @@ const LogFileSelector: React.FC<LogFileSelectorProps> = ({
             Upload log
           </Button>
         </Grid2>
-        <Grid2 size={3}>
+        <Grid2 size={6}>
           <FormControl sx={{ minWidth: 200 }}>
             <InputLabel id="example-select-label">Load a sample Log</InputLabel>
             <Select
