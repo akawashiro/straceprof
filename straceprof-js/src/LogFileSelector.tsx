@@ -38,7 +38,7 @@ const LogFileSelector: React.FC<LogFileSelectorProps> = ({
   setIsLoading,
   setTitle,
 }) => {
-  const [selectedExample, setSelectedExample] = useState<string>('npm_install');
+  const [selectedExample, setSelectedExample] = useState<string>('ruby_build');
 
   const handleExampleChange = (event: SelectChangeEvent<string>) => {
     setSelectedExample(event.target.value);
