@@ -82,6 +82,10 @@ export function getProcessesFromLog(logContent: string): Process[] {
 
   // Process each line in the log
   const lines = logContent.split('\n');
+  let n_execve = 0;
+  let n_execveat = 0;
+  let n_exit = 0;
+  let n_exit_group = 0;
 
   for (const line of lines) {
     if (!line.trim()) continue;
@@ -90,6 +94,7 @@ export function getProcessesFromLog(logContent: string): Process[] {
 
     // Check if this is an execve line (process start)
     if (words.length > 2 && words[2] === 'execve') {
+      n_execve++;
       try {
         const process = parseExecveLine(line);
         processesMap[process.pid] = process;
@@ -97,12 +102,21 @@ export function getProcessesFromLog(logContent: string): Process[] {
         console.error('Error parsing execve line:', line, error);
       }
     }
+    if (words.length > 2 && words[2] === 'execveat') {
+      n_execveat++;
+      console.error('execveat is not supported yet');
+    }
 
     // Check if this is an exit or exit_group line (process end)
     if (
       words.length > 2 &&
       (words[2] === 'exit' || words[2] === 'exit_group')
     ) {
+      if (words[2] === 'exit') {
+        n_exit++;
+      } else {
+        n_exit_group++;
+      }
       try {
         const pid = parseInt(words[0], 10);
         if (processesMap[pid]) {
@@ -115,6 +129,9 @@ export function getProcessesFromLog(logContent: string): Process[] {
       }
     }
   }
+  console.log(
+    `Parsed ${n_execve} execve, ${n_execveat} execveat, ${n_exit} exit, ${n_exit_group} exit_group`
+  );
 
   // Filter out processes without end times
   const legitimateProcesses: Process[] = [];
