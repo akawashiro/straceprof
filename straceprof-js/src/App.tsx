@@ -62,7 +62,7 @@ function App() {
             fullWidth
             variant="outlined"
             size="small"
-            value="strace --trace=execve,execveat,exit,exit_group --follow-forks --string-limit=1000 -ttt --output=straceprof.log <command to profile>"
+            value="strace --trace=execve,execveat,exit,exit_group --follow-forks --string-limit=1000 -ttt --output=straceprof.log --seccomp-bpf <command to profile>"
             InputProps={{
               readOnly: true,
             }}
