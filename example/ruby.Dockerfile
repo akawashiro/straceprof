@@ -7,4 +7,4 @@ RUN ./autogen.sh
 RUN mkdir build
 WORKDIR /ruby/build
 RUN ../configure
-RUN strace --trace=execve,execveat,exit,exit_group --follow-forks --string-limit=1000 -ttt --output=/ruby_build.log make -j32
+RUN strace --trace=execve,execveat,exit,exit_group --follow-forks --string-limit=1000 -ttt --output=/ruby_build.log --seccomp-bpf make -j32
