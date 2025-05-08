@@ -254,6 +254,7 @@ strace \\
     --string-limit=1000 \\
     -ttt \\
     --output=<path to strace log file> \\
+    --seccomp-bpf \\
     <command to profile>
 
 Then, you can generate a profile graph using the following command:
