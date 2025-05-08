@@ -94,6 +94,7 @@ strace \
     --string-limit=1000 \
     -ttt \
     --output=straceprof.log \
+    --seccomp-bpf \
     <command to profile>
 ```
 

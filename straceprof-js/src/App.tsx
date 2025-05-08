@@ -29,7 +29,7 @@ function App() {
 
   const handleCopy = () => {
     const command =
-      'strace --trace=execve,execveat,exit,exit_group --follow-forks --string-limit=1000 -ttt --output=straceprof.log <command to profile>';
+      'strace --trace=execve,execveat,exit,exit_group --follow-forks --string-limit=1000 -ttt --output=straceprof.log --seccomp-bpf <command to profile>';
     navigator.clipboard
       .writeText(command)
       .then(() => {
