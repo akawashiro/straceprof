@@ -17,6 +17,7 @@ $ strace \
     --string-limit=1000 \
     -ttt \
     --output=straceprof.log \
+    --seccomp-bpf \
     <command to profile>
 $ straceprof \
     --log=straceprof.log \
@@ -82,6 +83,7 @@ strace \
     --string-limit=1000 \
     -ttt \
     --output=<path to strace log file> \
+    --seccomp-bpf \
     <command to profile>
 ```
 
