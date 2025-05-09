@@ -279,7 +279,7 @@ const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
       const x = (t / visibleTimeRange) * effectiveWidth + CANVAS_PADDING;
 
       // Format time label (seconds from start time)
-      const timeLabel = `${t.toFixed(1)}s`;
+      const timeLabel = `${(t + startTime).toFixed(1)}s`;
       ctx.fillText(timeLabel, x, 45 + CANVAS_PADDING); // Position at top below title
 
       // Draw light grid line
