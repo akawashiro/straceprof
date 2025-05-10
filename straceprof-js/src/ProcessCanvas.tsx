@@ -10,6 +10,7 @@ interface ProcessCanvasProps {
   thresholdToShowProcess: number;
   timeRange: [number, number];
   colorMap: Record<string, string>;
+  regexpFilterProcess: string;
 }
 
 /**
@@ -41,15 +42,30 @@ function generateText(
 }
 
 /**
- * Generate filtered processes based on threshold
- * Returns processes that exceed the threshold duration, sorted by start time
+ * Generate filtered processes based on threshold and regexp
+ * Returns processes that exceed the threshold duration and match the regexp, sorted by start time
  */
 function generateFilteredProcesses(
   processes: Process[],
-  thresholdToShowProcess: number
+  thresholdToShowProcess: number,
+  regexpFilterProcess: string
 ): Process[] {
+  // Create RegExp object from the filter string
+  let regexpFilter: RegExp;
+  try {
+    regexpFilter = new RegExp(regexpFilterProcess);
+  } catch (error) {
+    // If invalid regexp, use a regexp that matches everything
+    console.error('Invalid regexp:', error);
+    regexpFilter = new RegExp('.*');
+  }
+
   return processes
-    .filter((p) => p.endTime - p.startTime >= thresholdToShowProcess)
+    .filter(
+      (p) =>
+        p.endTime - p.startTime >= thresholdToShowProcess &&
+        regexpFilter.test(p.fullCommand)
+    )
     .sort((a, b) => a.startTime - b.startTime);
 }
 
@@ -68,6 +84,7 @@ const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
   thresholdToShowProcess,
   timeRange,
   colorMap,
+  regexpFilterProcess,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const theme = useTheme();
@@ -189,13 +206,15 @@ const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
   useEffect(() => {
     const filteredProcesses = generateFilteredProcesses(
       processes,
-      thresholdToShowProcess
+      thresholdToShowProcess,
+      regexpFilterProcess
     );
     if (filteredProcesses.length > 0) {
       // Calculate process layout (which vCPU each process runs on)
       const processToVcpu = calculateProcessVcpuAllocation(
         processes,
-        thresholdToShowProcess
+        thresholdToShowProcess,
+        regexpFilterProcess
       );
       const maxVcpu =
         processToVcpu.length > 0 ? Math.max(...processToVcpu) + 1 : 0;
@@ -211,12 +230,13 @@ const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
         height: newHeight,
       }));
     }
-  }, [processes, thresholdToShowProcess]);
+  }, [processes, thresholdToShowProcess, regexpFilterProcess]);
 
   useEffect(() => {
     const filteredProcesses = generateFilteredProcesses(
       processes,
-      thresholdToShowProcess
+      thresholdToShowProcess,
+      regexpFilterProcess
     );
     if (!canvasRef.current || filteredProcesses.length === 0) return;
 
@@ -244,7 +264,8 @@ const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
     // Calculate process layout (which vCPU each process runs on)
     const processToVcpu = calculateProcessVcpuAllocation(
       processes,
-      thresholdToShowProcess
+      thresholdToShowProcess,
+      regexpFilterProcess
     );
     const maxVcpu =
       processToVcpu.length > 0 ? Math.max(...processToVcpu) + 1 : 0;
@@ -357,6 +378,7 @@ const ProcessCanvas: React.FC<ProcessCanvasProps> = ({
     title,
     colorMap,
     theme.typography.fontFamily,
+    regexpFilterProcess,
   ]);
 
   return (

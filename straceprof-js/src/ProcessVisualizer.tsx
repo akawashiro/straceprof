@@ -23,30 +23,20 @@ const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
   isLoading,
   regexpFilterProcess,
 }) => {
-  // Filter processes based on threshold, time range, and regexp pattern
+  // Filter processes based on threshold and time range
+  // Note: regexp filtering is now handled by ProcessCanvas
   const filteredProcesses = useMemo(() => {
     if (processes.length === 0) return [];
 
     const minTime = Math.min(...processes.map((p) => p.startTime));
 
-    // Create RegExp object from the filter string
-    let regexpFilter: RegExp;
-    try {
-      regexpFilter = new RegExp(regexpFilterProcess);
-    } catch (error) {
-      // If invalid regexp, use a regexp that matches everything
-      console.error('Invalid regexp:', error);
-      regexpFilter = new RegExp('.*');
-    }
-
     return processes.filter(
       (p) =>
         p.endTime - p.startTime >= thresholdToShowProcess &&
         p.startTime - minTime <= timeRange[1] &&
-        p.endTime - minTime >= timeRange[0] &&
-        regexpFilter.test(p.fullCommand)
+        p.endTime - minTime >= timeRange[0]
     );
-  }, [processes, thresholdToShowProcess, timeRange, regexpFilterProcess]);
+  }, [processes, thresholdToShowProcess, timeRange]);
 
   // ProcessCanvas handles its own dimensions and tooltip functionality
 
@@ -76,6 +66,7 @@ const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
             thresholdToShowProcess={thresholdToShowProcess}
             timeRange={timeRange}
             colorMap={colorMap}
+            regexpFilterProcess={regexpFilterProcess}
           />
         </Box>
       )}

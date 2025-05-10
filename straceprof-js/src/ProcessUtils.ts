@@ -224,11 +224,26 @@ export function generateColorMap(processes: Process[]): Record<string, string> {
 
 export function calculateProcessVcpuAllocation(
   processes: Process[],
-  thresholdToShowProcess: number
+  thresholdToShowProcess: number,
+  regexpFilterProcess: string = '^.*$'
 ): number[] {
-  // Filter processes based on thresholdToShowProcess
+  // Create RegExp object from the filter string
+  let regexpFilter: RegExp;
+  try {
+    regexpFilter = new RegExp(regexpFilterProcess);
+  } catch (error) {
+    // If invalid regexp, use a regexp that matches everything
+    console.error('Invalid regexp:', error);
+    regexpFilter = new RegExp('.*');
+  }
+
+  // Filter processes based on thresholdToShowProcess and regexp
   const filteredProcesses = processes
-    .filter((p) => p.endTime - p.startTime >= thresholdToShowProcess)
+    .filter(
+      (p) =>
+        p.endTime - p.startTime >= thresholdToShowProcess &&
+        regexpFilter.test(p.fullCommand)
+    )
     .sort((a, b) => a.startTime - b.startTime);
 
   // Calculate process layout (which vCPU each process runs on)
