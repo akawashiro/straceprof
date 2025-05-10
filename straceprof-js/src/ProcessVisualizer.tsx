@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { Process, generateColorMap } from './ProcessUtils';
-import { Box, Container, Typography } from '@mui/material';
+import { Box, Container } from '@mui/material';
 import ProcessCanvas from './ProcessCanvas';
 
 interface ProcessVisualizerProps {
@@ -23,23 +23,6 @@ const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
   isLoading,
   regexpFilterProcess,
 }) => {
-  // Filter processes based on threshold and time range
-  // Note: regexp filtering is now handled by ProcessCanvas
-  const filteredProcesses = useMemo(() => {
-    if (processes.length === 0) return [];
-
-    const minTime = Math.min(...processes.map((p) => p.startTime));
-
-    return processes.filter(
-      (p) =>
-        p.endTime - p.startTime >= thresholdToShowProcess &&
-        p.startTime - minTime <= timeRange[1] &&
-        p.endTime - minTime >= timeRange[0]
-    );
-  }, [processes, thresholdToShowProcess, timeRange]);
-
-  // ProcessCanvas handles its own dimensions and tooltip functionality
-
   // Generate color map once when filtered processes change
   const colorMap = useMemo(() => generateColorMap(processes), [processes]);
 
@@ -53,23 +36,16 @@ const ProcessVisualizer: React.FC<ProcessVisualizerProps> = ({
       maxWidth={false}
       sx={{ px: 3, display: 'flex', justifyContent: 'center' }}
     >
-      {filteredProcesses.length === 0 ? (
-        <Typography variant="body1">
-          No processes to display. Try reducing the minimum duration, adjusting
-          the time range, or modifying the regexp filter.
-        </Typography>
-      ) : (
-        <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
-          <ProcessCanvas
-            processes={filteredProcesses}
-            title={title}
-            thresholdToShowProcess={thresholdToShowProcess}
-            timeRange={timeRange}
-            colorMap={colorMap}
-            regexpFilterProcess={regexpFilterProcess}
-          />
-        </Box>
-      )}
+      <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+        <ProcessCanvas
+          processes={processes}
+          title={title}
+          thresholdToShowProcess={thresholdToShowProcess}
+          timeRange={timeRange}
+          colorMap={colorMap}
+          regexpFilterProcess={regexpFilterProcess}
+        />
+      </Box>
     </Container>
   );
 };
