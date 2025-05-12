@@ -1,6 +1,8 @@
-# straceprof-js
+# Access [https://akawashiro.com/software/straceprof/](https://akawashiro.com/software/straceprof/)!
 
-A web-based visualization tool for strace logs. This is the JavaScript/web version of the [straceprof](https://github.com/akawashiro/straceprof/tree/main/straceprof-python) Python tool.
+# straceprof
+
+A web-based visualization tool for strace logs.
 
 ## Features
 
@@ -18,7 +20,7 @@ A web-based visualization tool for strace logs. This is the JavaScript/web versi
 
 ## Introduction
 
-`straceprof-js` is a profiler designed for multi-process programs. It can visualize the execution of any process when you can run it under [strace](https://strace.io/). It is particularly well-suited for profiling build processes such as those initiated by `make`, `cmake`, shell scripts, or `docker build`.
+`straceprof` is a profiler designed for multi-process programs. It can visualize the execution of any process when you can run it under [strace](https://strace.io/). It is particularly well-suited for profiling build processes such as those initiated by `make`, `cmake`, shell scripts, or `docker build`.
 
 The web interface allows you to:
 
@@ -41,7 +43,7 @@ The web interface allows you to:
 
    ```bash
    git clone https://github.com/akawashiro/straceprof.git
-   cd straceprof/straceprof-js
+   cd straceprof
    ```
 
 2. Install dependencies:
@@ -85,7 +87,7 @@ The web interface allows you to:
 
 ### Generating Strace Logs
 
-To generate a strace log file for use with straceprof-js, run the following command:
+To generate a strace log file for use with straceprof, run the following command:
 
 ```bash
 strace \
@@ -102,7 +104,7 @@ Replace `<command to profile>` with the command you want to profile, such as `ma
 
 ## How It Works
 
-straceprof-js parses strace log files to extract information about processes:
+straceprof parses strace log files to extract information about processes:
 
 1. It looks for `execve` lines to identify when a process starts
 2. It looks for `exit` or `exit_group` lines to identify when a process ends
@@ -145,10 +147,6 @@ straceprof-js parses strace log files to extract information about processes:
 - `npm run test:watch` - Run tests in watch mode
 - `npm run test:coverage` - Run tests with coverage report
 
-## Related Projects
-
-- [straceprof-python](https://github.com/akawashiro/straceprof/tree/main/straceprof-python) - The Python version of straceprof
-
 ## Motivation
 
 Software compilation often involves numerous processes, including compilers, assemblers, linkers, and file copying operations. These processes are typically coordinated using tools like `make`.
@@ -157,7 +155,7 @@ A common challenge in software development is the significant amount of time req
 
 However, profiling build processes can be complex due to the wide range of build systems available. While some build systems incorporate built-in profiling capabilities, others do not. Furthermore, developers frequently combine multiple build systems using shell scripts or Dockerfile to construct a single software product.
 
-straceprof-js provides a web-based interface for visualizing and analyzing these build processes, making it easier to identify bottlenecks and optimize build times.
+straceprof provides a web-based interface for visualizing and analyzing these build processes, making it easier to identify bottlenecks and optimize build times.
 
 ## License
 
